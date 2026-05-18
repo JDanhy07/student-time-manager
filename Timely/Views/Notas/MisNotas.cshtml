@@ -1,0 +1,30 @@
+﻿@model IEnumerable<Timely.Models.Nota>
+
+@{
+    ViewData["Title"] = "Mis Notas";
+}
+
+<!-- Vincular el CSS -->
+<link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+
+<div class="container">
+    <h1>Mis Notas</h1>
+    <p><a asp-action="Create" class="crear-nota">Crear nueva nota</a></p>
+
+    @foreach (var grupo in Model.GroupBy(n => n.Carpeta))
+    {
+        <div class="folder">
+            <h2 class="folder-title">@grupo.Key</h2> <!-- Nombre de la Carpeta -->
+            @foreach (var item in grupo)
+            {
+                <div class="note-card">
+                    <div class="note-content">@Html.DisplayFor(modelItem => item.Contenido)</div>
+                    <div class="actions">
+                        @Html.ActionLink("Editar", "Edit", new { id = item.Id }, new { @class = "btn-edit" }) |
+                        @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }, new { @class = "btn-delete" })
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

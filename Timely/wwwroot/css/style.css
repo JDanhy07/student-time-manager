@@ -1,0 +1,495 @@
+﻿body {
+	font-family:"Bitstream Vera Sans",Verdana,Arial,Helvetica,Sans,"Bitstream Vera Serif";
+	font-size: 0.75em;
+	width:100%;
+	margin: 0;
+	padding: 0;
+	color: #000;
+}
+
+#top {
+	background: url("bgcus.jpg") no-repeat center center;
+	background-size: cover;
+	height: auto;
+	min-height: 180px;
+	position: relative;
+}
+
+	#top img {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+#slogan {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	color: white;
+	font-size: clamp(1.2rem, 5vw, 2rem);
+	background: rgba(0,0,0,0.3);
+	padding: 0.2rem 0.8rem;
+	border-radius: 8px;
+}
+
+/* Ajuste del navbar en móviles */
+@media (max-width: 768px) {
+	#menu .navbar-nav {
+		text-align: center;
+		width: 100%;
+	}
+
+	#menu .btn-outline-info {
+		margin: 5px auto;
+		width: 80%;
+		display: inline-block;
+	}
+}
+
+#slogan {
+	top: 5px;
+	left: 10px;
+	position: absolute;
+	color: white !important;
+	font-weight: Normal;
+	font-family: Times;
+	font-size: 22px;
+}
+
+#menu {
+	background-color: #e6f2ff;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: right;
+}
+	#menu ul {		
+		margin: 0;
+	}
+#menu li {
+	list-style-type: none;
+	display: inline;
+	
+}
+#menu li a {
+	color: #000 !important;
+	text-decoration: none;
+}
+	#menu li a:hover {
+		padding: 8px 30px;
+		border: 10px; /* Mantener el borde siempre igual */
+		box-sizing: border-box; /* Evita que el tamaño cambie */
+		color: #73cbf0;
+		text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+	}
+#main {
+	padding: 10px;
+	letter-spacing: .1em;
+	width: 97%;
+	font-family:Tahoma;
+}
+#main a {
+	color: #496f9c;
+	text-decoration: none;
+	font-weight: bold;
+}
+#main a:hover {
+	color: #1c2a3b;
+	text-decoration: none;
+}
+#main .title {
+	font-size: 2em;
+	color: #071B31;
+	font-family:Georgia;
+}
+#main .text {
+	margin: .5em;
+	text-align: justify;
+}
+#main .footie {
+	font-size: 0.75em;
+	text-align: justify;
+	text-align: right;
+	border-bottom: 1px dashed #5e6d84;
+	margin-bottom: 1em;
+	padding-bottom: 1em;
+}
+#side {
+	
+	margin: 5px;
+	width: 160px;
+}
+#side .text {
+	
+	margin: 5px;
+	border: 1px solid #adadad;
+	background-color: #ededed;
+}
+#side .text:hover {
+	background-color: #000;
+}
+#side a {
+	color: #496f9c;
+	text-decoration: none;
+}
+#side a:hover {
+	color: #1c2a3b;
+	text-decoration: none;
+}
+#footer {
+	clear: both;
+	font-size: .80em;
+	border-top: 3px dotted #696969;
+	padding: 10px;
+	background-color: #ededed;
+	bottom: 0;
+	position: fixed
+}
+#footer a {
+	color: #496f9c;
+	text-decoration: none;
+}
+#footer a:hover {
+	color: #1c2a3b;
+	text-decoration: none;
+}
+#footer .left {
+	text-align: left;
+	float: left;
+}
+	#footer .right {
+		text-align: right;
+		float: right;
+	}
+	
+
+.estado span {
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.estado-vencido {
+	background-color: #ffcccc; /* Rojo claro */
+	color: #a00000;
+	border: 1px solid #a00000;
+}
+
+.estado-proceso {
+	background-color: #fff3cd; /* Amarillo claro */
+	color: #856404;
+	border: 1px solid #856404;
+}
+
+.estado-normal {
+	background-color: #d4edda; /* Verde claro */
+	color: #155724;
+	border: 1px solid #155724;
+}
+
+.navbar .btn-outline-info {
+	border-radius: 17px;
+	transition: all 0.3s ease-in-out;
+	border-color: #73cbf0;
+	background-color: rgba(135, 206, 235, 0.2);
+	color: #007b9e;
+	font-weight: bold;
+}
+
+	.navbar .btn-outline-info:hover {
+		background-color: rgba(135, 206, 235, 0.5); /* Esto va hacer que aumente el tamaño a la hora de pasar el mause chiquilles */
+		color: white;
+		transition: 0.5s ease-in-out;
+	}
+	/*---------------------------------------------------------------------- ESTE ES EL CREATE DE NOTAS*/
+
+/* Contenedor principal del formulario */
+.create-container {
+	max-width: 600px;
+	margin: 40px auto;
+	padding: 20px;
+	background: #f8f9fa;
+	border-radius: 8px;
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estiliza la tarjeta del formulario */
+.form-card {
+	padding: 20px;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Etiquetas de los inputs */
+label {
+	font-weight: bold;
+	display: block;
+	margin-top: 10px;
+}
+
+/* Campos de entrada */
+input[type="text"],
+textarea {
+	width: 100%;
+	padding: 10px;
+	margin-top: 5px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 16px;
+}
+
+/* Botón de guardar */
+button {
+	width: 100%;
+	background: #007bff;
+	color: white;
+	border: none;
+	padding: 10px;
+	font-size: 16px;
+	border-radius: 5px;
+	cursor: pointer;
+	margin-top: 15px;
+	transition: background 0.3s;
+}
+
+	button:hover {
+		background: #0056b3;
+	}
+
+/* Enlace de volver */
+.back-link {
+	display: inline-block;
+	margin-top: 15px;
+	color: #007bff;
+	text-decoration: none;
+}
+
+	.back-link:hover {
+		text-decoration: underline;
+	}
+
+/* Evita que el texto largo haga que la tabla se expanda demasiado */
+table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+/* Hace que el contenido de la celda se ajuste y rompa las palabras largas */
+td {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	white-space: normal;
+}
+/*------------------------------------------------------------------------- EL CSS DE NOTAS*/
+
+
+body {
+	font-family: 'Segoe UI', sans-serif;
+	background-color: #f9f7ff; /* Fondo lila claro */
+	color: #333;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	max-width: 800px;
+	margin: 20px auto;
+	padding: 20px;
+}
+
+/* Estilo para cada carpeta de notas */
+.folder {
+	margin-bottom: 30px;
+	background: #fff;
+	padding: 15px;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Título de cada carpeta */
+.folder-title {
+	font-size: 22px;
+	color: #6a5acd; /* Lila */
+	border-bottom: 2px solid #6a5acd;
+	padding-bottom: 5px;
+}
+
+/* Tarjetas de notas */
+.note-card {
+	background: #fefefe;
+	border-left: 5px solid #6a5acd;
+	padding: 15px;
+	margin: 10px 0;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.note-content {
+	font-size: 16px;
+	color: #555;
+}
+
+/* Acciones */
+.actions {
+	text-align: right;
+	margin-top: 10px;
+}
+
+.btn-edit {
+	text-decoration: none;
+	color: #6a5acd;
+	font-weight: bold;
+}
+
+	.btn-edit:hover {
+		color: #483d8b;
+	}
+
+.btn-delete {
+	text-decoration: none;
+	color: red;
+	font-weight: bold;
+}
+
+	.btn-delete:hover {
+		color: darkred;
+	}
+
+/* Botón para agregar notas */
+.crear-nota {
+	display: inline-block;
+	background: #6a5acd;
+	color: white;
+	padding: 8px 15px;
+	border-radius: 5px;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+	.crear-nota:hover {
+		background: #483d8b;
+	}
+
+	/*----------------------------------------------------------------------------------- MIS PROYECTOS*/
+
+body {
+	font-family: 'Segoe UI', sans-serif;
+	background-color: #f9f7ff; /* Lila claro */
+	color: #333;
+	margin: 0;
+	padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+	max-width: 1000px;
+	margin: 20px auto;
+	padding: 20px;
+}
+
+/* Encabezado */
+h11 {
+	font-size: 28px;
+	color: #333;
+}
+
+/* Estilo para la barra de navegación */
+.navbar {
+	background: #cfe2ff; /* Azul pastel */
+	padding: 10px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+	/* Botones de la barra de navegación */
+	.navbar a {
+		text-decoration: none;
+		background: #d6e4ff;
+		color: #333;
+		padding: 8px 15px;
+		border-radius: 20px;
+		margin: 5px;
+		font-weight: bold;
+		border: 2px solid transparent;
+		transition: 0.3s;
+	}
+
+		.navbar a:hover {
+			background: #b0c4ff;
+			border: 2px solid #6a5acd;
+		}
+
+/* Tabla de proyectos */
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+	background: white;
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+	.table th, .table td {
+		padding: 12px;
+		text-align: left;
+		border-bottom: 1px solid #ddd;
+	}
+
+	.table th {
+		background: #cfe2ff;
+		font-weight: bold;
+	}
+
+/* Estados con colores pastel */
+.estado-vencido {
+	background: #ffcccc;
+	color: #b22222;
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.estado-en-proceso {
+	background: #fff4b2;
+	color: #8b8000;
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.estado-inactivo {
+	background: #cce5ff;
+	color: #004085;
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+/* Botones de acciones */
+.actions a {
+	text-decoration: none;
+	font-weight: bold;
+	margin-right: 10px;
+}
+
+.actions .btn-edit {
+	color: #6a5acd;
+}
+
+	.actions .btn-edit:hover {
+		text-decoration: underline;
+	}
+
+.actions .btn-delete {
+	color: red;
+}
+
+	.actions .btn-delete:hover {
+		text-decoration: underline;
+	}
+	
+
+
+

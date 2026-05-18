@@ -1,0 +1,28 @@
+﻿@model Timely.Models.Usuarios
+
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<h3>Mi Perfil</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Perfil</th>
+            <th>Correo</th>
+            <th>Fecha</th>
+            <th>Contraseña</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Html.DisplayFor(model => model.Usuario)</td>
+            <td>@Html.DisplayFor(Model => Model.Perfil)</td>
+            <td>@Html.DisplayFor(Model => Model.Correo)</td>
+            <td>@Html.DisplayFor(Model => Model.Fecha)</td>
+            <td>@Html.DisplayFor(model => model.Contrasena)</td>
+        </tr>
+    </tbody>
+</table>

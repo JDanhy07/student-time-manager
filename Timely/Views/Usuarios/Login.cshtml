@@ -1,0 +1,114 @@
+﻿@model IEnumerable<Timely.Models.Usuarios>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<style>
+    /* Estilos responsivos para la página de inicio */
+    .hero-text {
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        font-size: 1.125rem; /* 18px en desktop, escalable */
+        line-height: 1.6;
+    }
+
+    .hero-title {
+        font-size: 1.75rem; /* 28px */
+        line-height: 1.6;
+    }
+
+    .contenedor-flex {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+        .contenedor-flex .texto {
+            flex: 2;
+            min-width: 250px;
+        }
+
+        .contenedor-flex .imagen {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .contenedor-flex img {
+            width: 100%;
+            border-radius: 8px;
+            height: auto;
+            object-fit: cover;
+        }
+
+    /* Invertir orden en móviles si es necesario */
+    @@media (max-width: 768px) {
+        .contenedor-flex
+
+    {
+        flex-direction: column;
+    }
+
+    .contenedor-flex.reverse {
+        flex-direction: column-reverse;
+    }
+
+    .hero-text {
+        font-size: 1rem;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    }
+</style>
+
+<!-- Primera fila: texto a la izquierda, imagen derecha -->
+<div class="contenedor-flex">
+    <div class="texto hero-text">
+        <br />
+        <strong>Timely:</strong> Gestiona tu tiempo, simplifica tu vida.<br /><br />
+
+        Sabemos lo difícil que es organizar tareas, exámenes y vida personal. <br />
+        Por eso creamos Timely, hecho por estudiantes de Ingeniería de Software. <br />
+        Con herramientas simples y efectivas, te ayudamos a priorizar tareas, <br />
+        tomar apuntes importantes y organizar tu calendario en un solo lugar.<br /><br />
+
+        Nuestra misión es que la gestión del tiempo sea simple y efectiva. <br />
+        No solo brindamos herramientas, también estrategias y consejos clave <br />
+        para ayudarte a mejorar tus hábitos de organización y enfoque.<br /><br />
+
+        ¿Listo para tomar el control de tu tiempo con menos estrés? <br />
+        ¡Prueba Timely y mejora tu productividad día a día!
+    </div>
+    <div class="imagen">
+        <img src="~/img/gestion-del-tiempo.jpg" alt="Gestión del tiempo" />
+    </div>
+</div>
+
+<!-- Segunda fila: imagen izquierda, texto derecha (en móviles se invierte el orden) -->
+<div class="contenedor-flex reverse">
+    <div class="imagen">
+        <img src="~/img/importancia.jpg" alt="Importancia de gestionar el tiempo" />
+    </div>
+    <div class="texto hero-text">
+        <h1 class="hero-title">¿Por qué es importante gestionar tu tiempo?</h1>
+        <br />
+
+        Gestionar bien tu tiempo no se trata solo de organizar tareas, <br />
+        sino de construir un camino hacia tus metas personales y académicas. <br />
+        Cuando aprendes a administrar tus horas, puedes ser más productivo, <br />
+        reducir el estrés y encontrar un mejor equilibrio entre el estudio <br />
+        y tu vida personal. <br /><br />
+
+        En Timely creemos que una buena gestión del tiempo te permite <br />
+        avanzar con claridad, tomar decisiones más conscientes y disfrutar <br />
+        de tus logros sin sentirte abrumado. Cada minuto cuenta, y aprender <br />
+        a usarlo bien es una habilidad que transforma tu día a día. <br /><br />
+
+        Empieza a tomar el control de tu tiempo y conviértelo en tu mejor aliado.
+    </div>
+</div>

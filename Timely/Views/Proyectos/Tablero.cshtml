@@ -1,0 +1,124 @@
+﻿@model IEnumerable<Timely.Models.Proyectos>
+
+@{
+    ViewData["Title"] = "Tablero";
+}
+
+<style>
+    .estado span {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .estado-vencido {
+        background-color: #ffcccc; /* Rojo suave */
+        color: #a00000;
+        border: 1px solid #a00000;
+    }
+
+    .estado-proceso {
+        background-color: #fff3cd; /* Amarillo suave */
+        color: #856404;
+        border: 1px solid #856404;
+    }
+
+    .estado-inactivo {
+        background-color: #cce5ff; /* Azul pastel */
+        color: #004085;
+        border: 1px solid #004085;
+    }
+
+    .estado-hecho {
+        background-color: #c3e6cb; /* Verde suave */
+        color: #155724;
+        border: 1px solid #155724;
+    }
+</style>
+
+<h3>Mis proyectos</h3>
+
+<p>
+    <a asp-action="Create">Agregar nuevo proyecto</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Estado)</th>
+            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.Fecha_de_inicio)</th>
+            <th>@Html.DisplayNameFor(model => model.Vence)</th>
+            <th>Completar</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="estado">
+                    <span id="estado-@item.Id" class="@GetEstadoClase(item)">
+                        @GetEstadoTexto(item)
+                    </span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => item.Fecha_de_inicio)</td>
+                <td>@Html.DisplayFor(modelItem => item.Vence)</td>
+                <td>
+                    <input type="checkbox" class="check-proyecto"
+                           data-id="@item.Id"
+                           data-estado-original="@GetEstadoTexto(item)"
+                           onchange="actualizarEstado(this)"
+                    @(item.Estado == "Hecho" ? "checked" : "")>
+                </td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Eliminar", "Delete", new { id = item.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@functions {
+    string GetEstadoTexto(Timely.Models.Proyectos item)
+    {
+        if (item.Estado == "Hecho") return "Hecho";
+        if (item.Vence < DateTime.Now) return "Vencido";
+        if (item.Fecha_de_inicio > DateTime.Now) return "Inactivo";
+        return "En proceso";
+    }
+
+    string GetEstadoClase(Timely.Models.Proyectos item)
+    {
+        if (item.Estado == "Hecho") return "estado-hecho";
+        if (item.Vence < DateTime.Now) return "estado-vencido";
+        if (item.Fecha_de_inicio > DateTime.Now) return "estado-inactivo";
+        return "estado-proceso";
+    }
+}
+
+<script>
+        function actualizarEstado(checkbox) {
+        let id = checkbox.getAttribute("data-id");
+        let completado = checkbox.checked;
+
+        fetch('/Proyectos/ActualizarEstado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(id), completado: completado })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let estadoElemento = document.getElementById(`estado-${id}`);
+            estadoElemento.textContent = data.nuevoEstado;
+            estadoElemento.className = data.nuevaClase;
+            checkbox.setAttribute("data-estado-original", data.nuevoEstado);
+        })
+        .catch(error => {
+            alert("Hubo un error al actualizar el estado.");
+            console.error(error);
+        });
+    }
+</script>
+
