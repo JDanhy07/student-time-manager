@@ -1,47 +1,53 @@
-using System;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Timely.Models;
-using Microsoft.Extensions.DependencyInjection;
-using static Timely.Models.Service;
-
+using Microsoft.EntityFrameworkCore;
+using Timely.Data;
+using Timely.Services;
+using Timely.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<Service>();
 builder.Services.AddHttpContextAccessor();
+
+// EF Core: AddDbContext reemplaza el AddScoped<ApplicationDbContext> anterior.
+// Lee la connection string desde appsettings.json — nunca hardcodeada en el código.
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Timely")));
+
+// Servicios — sin cambios respecto al paso anterior
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IProyectoService, ProyectoService>();
+builder.Services.AddScoped<INotaService, NotaService>();
+builder.Services.AddScoped<ICalendarioService, CalendarioService>();
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("EsAdministrador", policy => policy.RequireRole("Administrador"));
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => {
+    .AddCookie(options =>
+    {
         options.LoginPath = "/Usuarios/Login";
         options.AccessDeniedPath = "/Usuarios/AccesoDenegado";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
         options.SlidingExpiration = true;
     });
 
-//TIEMPO DE VENCIMIENTO
-
+builder.Services.AddSession();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -50,4 +56,3 @@ app.MapControllerRoute(
     pattern: "{controller=Usuarios}/{action=Index}/{id?}");
 
 app.Run();
-

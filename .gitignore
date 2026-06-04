@@ -1,0 +1,13 @@
+﻿################################################################################
+# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/student-time-manager/CopilotIndices/17.14.1661.41761
+/.vs/student-time-manager/FileContentIndex
+/.vs/student-time-manager/v17/.wsuo
+/.vs/student-time-manager/v17/DocumentLayout.backup.json
+/.vs/student-time-manager/v17/DocumentLayout.json
+/.vs
+/Timely/Migrations/20260604042945_VerificarModelo.cs
+/Timely/Migrations/20260604014833_InitialCreate.Designer.cs
+/Timely/Migrations/20260604042945_VerificarModelo.Designer.cs
