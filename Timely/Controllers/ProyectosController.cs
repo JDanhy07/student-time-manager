@@ -1,198 +1,134 @@
-﻿using System.Data.Entity;
 using System.Text.Json;
-using Humanizer.Localisation.TimeToClockNotation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Timely.Models;
-using static Timely.Models.Proyectos;
-using System.Linq;
+using Timely.Services.Interfaces;
 
 namespace Timely.Controllers
 {
-	// Controlador encargado de la gestión de proyectos
-	public class ProyectosController : Controller
-	{
-		// Servicio que contiene la lógica de negocio para los proyectos
-		private Service Service;
+    public class ProyectosController : Controller
+    {
+        private readonly IProyectoService _proyectoService;
 
-		// Constructor que inicializa el servicio
-		public ProyectosController()
-		{
-			Service = new Service();
-		}
+        public ProyectosController(IProyectoService proyectoService)
+        {
+            _proyectoService = proyectoService;
+        }
 
-		// GET: ProyectosController
-		// Muestra todos los proyectos en el tablero principal
-		public ActionResult Tablero()
-		{
-			var model = Service.mostrarProyecto(); // Llama al servicio para obtener la lista de proyectos
-			return View(model); // Devuelve la vista con el modelo
-		}
+        public ActionResult Tablero()
+        {
+            var model = _proyectoService.ObtenerTodos();
+            return View(model);
+        }
 
-		// GET: ProyectosController/Details/5
-		// Muestra detalles de un proyecto (no implementado aún)
-		public ActionResult Details(int id)
-		{
-			return View();
-		}
+        public ActionResult Create()
+        {
+            return View();
+        }
 
-		// GET: ProyectosController/Create
-		// Muestra el formulario para crear un nuevo proyecto
-		public ActionResult Create()
-		{
-			return View();
-		}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Proyectos proyecto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return View(proyecto);
 
-		// POST: ProyectosController/Create
-		// Recibe los datos del formulario y crea un nuevo proyecto
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public ActionResult Create(Proyectos proyecto)
-		{
-			try
-			{
-				if (ModelState.IsValid)
-				{
-					Service.agregarProyecto(proyecto); // Agrega el proyecto
-					return RedirectToAction("Tablero"); // Redirige al tablero
-				}
-			}
-			catch
-			{
-				// Muestra un mensaje si el proyecto ya existe
-				ModelState.AddModelError("", "El proyecto que deseas registrar ya está agendado. Intenta con otro.");
-			}
-			return View(); // Si falla, vuelve al formulario
-		}
+                _proyectoService.AgregarProyecto(proyecto);
+                return RedirectToAction(nameof(Tablero));
+            }
+            catch
+            {
+                ModelState.AddModelError("", "El proyecto que deseas registrar ya está agendado. Intenta con otro.");
+                return View(proyecto);
+            }
+        }
 
-		// GET: /vencidos
-		// Devuelve una lista de proyectos que están vencidos (Estado = "Vencido")
-		[HttpGet("vencidos")]
-		public async Task<IActionResult> GetProyectosVencidos()
-		{
-			var proyectosVencidos = await Service.Proyectos.Where(p => p.Estado == "Vencido").ToListAsync();
-			return Ok(proyectosVencidos); // Retorna los proyectos vencidos como JSON
-		}
+        // Antes: GET que hacía el borrado directamente — grave error de seguridad
+        // Ahora: GET solo muestra la vista de confirmación
+        public ActionResult Delete(int id)
+        {
+            var proyecto = _proyectoService.BuscarPorId(id);
+            return View(proyecto);
+        }
 
-		// GET: ProyectosController/Edit/5
-		// Muestra la vista de edición de un proyecto específico
-		public ActionResult Edit(int id)
-		{
-			var idBuscado = Service.buscarProyecto(id); // Busca el proyecto por ID
-			return View(idBuscado); // Carga la vista de edición con los datos
-		}
+        // El borrado real solo ocurre desde POST
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmado(int id)
+        {
+            try
+            {
+                var proyecto = _proyectoService.BuscarPorId(id);
+                _proyectoService.EliminarProyecto(proyecto);
+                return RedirectToAction(nameof(Tablero));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return RedirectToAction(nameof(Tablero));
+            }
+        }
 
-		// POST: ProyectosController/Edit/5
-		// Actualiza los datos del proyecto
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public ActionResult Edit(Proyectos idActualizado)
-		{
-			try
-			{
-				if (ModelState.IsValid)
-				{
-					Service.actualizarProyecto(idActualizado); // Actualiza el proyecto
-					return RedirectToAction("Tablero");
-				}
-			}
-			catch
-			{
-				// Podrías capturar el error para registrar
-			}
-			return View(); // Si falla, vuelve a la vista
-		}
+        public ActionResult Edit(int id)
+        {
+            var proyecto = _proyectoService.BuscarPorId(id);
+            return View(proyecto);
+        }
 
-		// GET: ProyectosController/Delete/5
-		// Elimina un proyecto por ID (desde un botón o enlace)
-		public ActionResult Delete(int id)
-		{
-			try
-			{
-				var idEliminado = Service.buscarProyecto(id); // Busca el proyecto
-				Service.eliminarProyecto(idEliminado); // Lo elimina
-				return RedirectToAction("Tablero");
-			}
-			catch (Exception)
-			{
-				// Si falla la eliminación, igualmente vuelve al tablero
-				return RedirectToAction("Tablero");
-			}
-		}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(Proyectos proyecto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return View(proyecto);
 
-		// POST: ProyectosController/Delete/5
-		// Método POST alternativo para eliminar un proyecto (no implementado correctamente)
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public ActionResult Delete(int id, IFormCollection collection)
-		{
-			try
-			{
-				return RedirectToAction(nameof(Index)); // Redirige (aunque no hay método Index definido)
-			}
-			catch
-			{
-				return View();
-			}
-		}
+                _proyectoService.ActualizarProyecto(proyecto);
+                return RedirectToAction(nameof(Tablero));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(proyecto);
+            }
+        }
 
-		// POST: Actualizar el estado de un proyecto dinámicamente (usado con AJAX)
-		[HttpPost]
-		public ActionResult ActualizarEstado([FromBody] JsonElement data)
-		{
-			// Extrae el ID y el valor booleano "completado" del JSON recibido
-			int id = data.GetProperty("id").GetInt32();
-			bool completado = data.GetProperty("completado").GetBoolean();
+        // Antes: accedía a Service.Proyectos directamente desde el controller
+        // Ahora: delega al servicio
+        [HttpGet("vencidos")]
+        public async Task<IActionResult> GetProyectosVencidos()
+        {
+            var vencidos = await _proyectoService.ObtenerVencidosAsync();
+            return Ok(vencidos);
+        }
 
-			var proyecto = Service.buscarProyecto(id); // Busca el proyecto
-			if (proyecto == null)
-				return NotFound(); // Si no existe, retorna 404
+        [HttpPost]
+        public ActionResult ActualizarEstado([FromBody] JsonElement data)
+        {
+            int id = data.GetProperty("id").GetInt32();
+            bool completado = data.GetProperty("completado").GetBoolean();
 
-			// Asigna el nuevo estado según si fue marcado como "completado"
-			if (completado)
-			{
-				proyecto.Estado = "Hecho";
-			}
-			else
-			{
-				DateTime hoy = DateTime.Now;
-				if (hoy < proyecto.Fecha_de_inicio)
-					proyecto.Estado = "Inactivo";
-				else if (hoy > proyecto.Vence)
-					proyecto.Estado = "Vencido";
-				else
-					proyecto.Estado = "En proceso";
-			}
+            var proyecto = _proyectoService.BuscarPorId(id);
 
-			Service.actualizarProyecto(proyecto); // Guarda el cambio
+            proyecto.Estado = completado ? "Hecho" : ResolverEstadoPorFecha(proyecto);
+            _proyectoService.ActualizarProyecto(proyecto);
 
-			// Retorna el nuevo estado y una clase CSS para actualizar en la interfaz
-			return Json(new
-			{
-				nuevoEstado = proyecto.Estado,
-				nuevaClase = GetEstadoClase(proyecto.Fecha_de_inicio, proyecto.Vence, proyecto.Estado)
-			});
-		}
+            return Json(new
+            {
+                nuevoEstado = proyecto.Estado,
+                nuevaClase = _proyectoService.ObtenerClaseEstado(proyecto.Fecha_de_inicio, proyecto.Vence, proyecto.Estado)
+            });
+        }
 
-		// Método auxiliar para determinar la clase CSS según el estado y fechas del proyecto
-		string GetEstadoClase(DateTime fechaInicio, DateTime fechaVencimiento, string estado)
-		{
-			DateTime hoy = DateTime.Now;
-
-			if (estado == "Hecho")
-				return "estado-hecho";
-
-			if (hoy < fechaInicio)
-				return "estado-inactivo";
-
-			if (hoy >= fechaInicio && hoy <= fechaVencimiento)
-				return "estado-proceso";
-
-			if (hoy > fechaVencimiento)
-				return "estado-vencido";
-
-			return "estado-normal";
-		}
-	}
+        // Método privado auxiliar — solo orquesta, no es lógica de negocio pesada
+        private static string ResolverEstadoPorFecha(Proyectos proyecto)
+        {
+            DateTime hoy = DateTime.Now;
+            if (hoy < proyecto.Fecha_de_inicio) return "Inactivo";
+            if (hoy > proyecto.Vence) return "Vencido";
+            return "En proceso";
+        }
+    }
 }
-
