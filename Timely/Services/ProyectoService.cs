@@ -18,6 +18,7 @@ namespace Timely.Services
         {
             _context.Proyectos.Add(proyecto);
             _context.SaveChanges();
+            Console.WriteLine($"Proyecto agregado: {proyecto.Nombre}, ID: {proyecto.Id}"); 
         }
 
         public List<Proyectos> ObtenerTodos()

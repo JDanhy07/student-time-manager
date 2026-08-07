@@ -31,9 +31,7 @@ namespace Timely.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return View(proyecto);
-
+                if (ModelState.IsValid)
                 _proyectoService.AgregarProyecto(proyecto);
                 return RedirectToAction(nameof(Tablero));
             }
@@ -82,11 +80,12 @@ namespace Timely.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return View(proyecto);
-
-                _proyectoService.ActualizarProyecto(proyecto);
-                return RedirectToAction(nameof(Tablero));
+                if (ModelState.IsValid)
+                {
+                    _proyectoService.ActualizarProyecto(proyecto);
+                    return RedirectToAction(nameof(Tablero));
+                }
+                return View(proyecto);
             }
             catch (Exception ex)
             {

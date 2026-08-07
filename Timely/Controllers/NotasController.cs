@@ -30,13 +30,11 @@ namespace Timely.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return View(nota);
-
+                if (ModelState.IsValid)
                 _notaService.AgregarNota(nota);
                 return RedirectToAction(nameof(MisNotas));
             }
-            catch
+            catch 
             {
                 ModelState.AddModelError("", "La nota que deseas añadir ya existe. Intenta con otra.");
                 return View(nota);

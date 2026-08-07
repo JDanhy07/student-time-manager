@@ -11,11 +11,6 @@
         <h2>Crear nueva nota</h2>
 
         <form asp-action="Create" method="post">
-            <div class="form-group">
-                <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" />
-                <span asp-validation-for="Id" class="text-danger"></span>
-            </div>
             <label for="titulo">Título</label>
             <input type="text" name="Titulo" id="titulo" placeholder="Escribe un título" required>
 

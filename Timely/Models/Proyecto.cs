@@ -1,28 +1,21 @@
-﻿// Namespace donde está definido el modelo del proyecto
+﻿
 namespace Timely.Models
 {
-	// Clase que representa un proyecto dentro de la aplicación
 	public class Proyectos
 	{
-		// Identificador único del proyecto (campo requerido)
-		public required int Id { get; set; }
 
-		// Nombre del proyecto (campo requerido)
+		public int Id { get; set; }
+
 		public required string Nombre { get; set; }
 
-		// Fecha en que el proyecto comienza
 		public DateTime Fecha_de_inicio { get; set; }
 
-		// Fecha en que el proyecto vence o debe completarse
 		public DateTime Vence { get; set; }
 
-		// Estado textual del proyecto ("Hecho", "Vencido" o "En proceso")
 		public string Estado;
 
-		// Campo privado que almacena si el proyecto está completado
-		private bool _completado;
+        private bool _completado;
 
-		// Propiedad pública que expone y modifica el estado 'Completado'
 		public bool Completado
 		{
 			// Retorna el valor actual
