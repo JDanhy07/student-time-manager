@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using Timely.Data;
 using Timely.Models;
 using Timely.Services.Interfaces;
@@ -8,14 +9,18 @@ namespace Timely.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordHasher<Usuarios> _passwordHasher; 
 
         public UsuarioService(ApplicationDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<Usuarios>();
         }
 
         public void AgregarUsuario(Usuarios user)
         {
+            user.Contrasena = _passwordHasher.HashPassword(user, user.Contrasena);
+
             _context.Usuarios.Add(user);
             _context.SaveChanges();
         }
@@ -35,10 +40,12 @@ namespace Timely.Services
         {
             var existente = BuscarPorId(usuario.Id);
             existente.Usuario = usuario.Usuario;
-            existente.Contrasena = usuario.Contrasena;
+            if (!string.IsNullOrEmpty(usuario.Contrasena) && usuario.Contrasena != existente.Contrasena)
+            {
+                existente.Contrasena = _passwordHasher.HashPassword(existente, usuario.Contrasena);
+            }
             existente.Perfil = usuario.Perfil;
             existente.Correo = usuario.Correo;
-            existente.Confirmacion = usuario.Confirmacion;
             existente.Fecha = usuario.Fecha;
             _context.SaveChanges();
         }
@@ -50,10 +57,25 @@ namespace Timely.Services
         }
 
         // TODO (Fase seguridad): cambiar contrasena a string y validar con BCrypt.Verify()
-        public Usuarios Login(string nombreUsuario, int contrasena)
+        public Usuarios Login(string nombreUsuario, string contrasena)
         {
-            return _context.Usuarios
-                .FirstOrDefault(u => u.Usuario == nombreUsuario && u.Contrasena == contrasena);
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Usuario == nombreUsuario);
+
+            if (usuario == null)
+            {
+                return null; //usuario no existe
+            }
+
+            //Comparamos el HASH de la BD con la contrasena que digito el usuario
+            var resultado = _passwordHasher.VerifyHashedPassword(usuario, usuario.Contrasena, contrasena);
+
+            if (resultado == PasswordVerificationResult.Success)
+            {
+                return usuario;
+            }
+
+            return null; //Contrasena incorrecta
+
         }
 
         public Usuarios ObtenerPerfil(ClaimsPrincipal user)

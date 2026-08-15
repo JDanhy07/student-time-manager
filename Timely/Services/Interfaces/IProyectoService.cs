@@ -5,7 +5,7 @@ namespace Timely.Services.Interfaces
     public interface IProyectoService
     {
         void AgregarProyecto(Proyectos proyecto);
-        List<Proyectos> ObtenerTodos();
+        List<Proyectos> ObtenerPorUsuario(int usuarioId);
         Proyectos BuscarPorId(int id);
         void ActualizarProyecto(Proyectos proyecto);
         void EliminarProyecto(Proyectos proyecto);

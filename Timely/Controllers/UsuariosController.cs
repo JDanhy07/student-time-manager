@@ -70,7 +70,7 @@ namespace Timely.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(string usuario, int contrasena)
+        public async Task<ActionResult> Login(string usuario, string contrasena)
         {
             try
             {
@@ -100,15 +100,14 @@ namespace Timely.Controllers
                         authProperties);
 
                     HttpContext.Session.SetString("Usuario", usuarioEncontrado.Usuario);
-                    Console.WriteLine("✅ Sesión iniciada correctamente.");
 
-                    return RedirectToAction("Login"); // Redirige según el flujo deseado
+                    return RedirectToAction("Index"); // Redirige según el flujo deseado
                 }
                 else
                 {
                     Console.WriteLine("❌ Usuario o contraseña incorrectos.");
                     ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
-                    return View("Index"); // Redirige a vista de error
+                    return View("Login"); // Redirige a vista de error
                 }
             }
             catch

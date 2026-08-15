@@ -12,7 +12,7 @@ namespace Timely.Services.Interfaces
         void EliminarUsuario(Usuarios usuario);
 
         // TODO (Fase seguridad): cambiar int a string y aplicar BCrypt
-        Usuarios Login(string nombreUsuario, int contrasena);
+        Usuarios Login(string nombreUsuario, string contrasena);
         Usuarios ObtenerPerfil(ClaimsPrincipal user);
     }
 }

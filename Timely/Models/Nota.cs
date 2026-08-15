@@ -1,4 +1,7 @@
 ﻿// Namespace donde se agrupa el modelo Nota
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Timely.Models
 {
 	// Clase que representa una nota dentro de la aplicación
@@ -15,5 +18,11 @@ namespace Timely.Models
 
 		// Carpeta a la que pertenece la nota (permite agrupar u organizar notas por categoría)
 		public string Carpeta { get; set; } // Nueva propiedad para organizar notas
+
+		[Required]
+		public int UsuarioId { get; set; }
+
+		[ForeignKey("UsuarioId")]
+		public virtual Usuarios Usuario { get; set; }
 	}
 }

@@ -1,6 +1,9 @@
 using Timely.Data;
 using Timely.Models;
 using Timely.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Timely.Services
 {
@@ -13,9 +16,16 @@ namespace Timely.Services
             _context = context;
         }
 
-        public List<Calendario> ObtenerEventos()
+        public List<Calendario> ObtenerEventosPorUsuario(int usuarioId)
         {
-            return _context.Calendario.ToList();
+            return _context.Calendario
+                           .Where(e => e.UsuarioId == usuarioId)
+                           .ToList();
+        }
+
+        public Calendario ObtenerEventoPorId(int id)
+        {
+            return _context.Calendario.FirstOrDefault(e => e.Id == id);
         }
 
         public void AgregarEvento(Calendario evento)
@@ -33,6 +43,7 @@ namespace Timely.Services
             existente.FechaInicio = evento.FechaInicio;
             existente.FechaFinal = evento.FechaFinal;
             existente.Descripcion = evento.Descripcion;
+
             _context.SaveChanges();
         }
 

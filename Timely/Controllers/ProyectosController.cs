@@ -2,21 +2,35 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Timely.Models;
 using Timely.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Timely.Controllers
 {
+    [Authorize]
     public class ProyectosController : Controller
     {
         private readonly IProyectoService _proyectoService;
+        private readonly IUsuarioService _usuarioService;
 
-        public ProyectosController(IProyectoService proyectoService)
+        public ProyectosController(IProyectoService proyectoService, IUsuarioService usuarioService)
         {
             _proyectoService = proyectoService;
+            _usuarioService = usuarioService;
+        }
+
+        private int ObtenerUsuarioActualId()
+        {
+            var usuario = _usuarioService.ObtenerPerfil(User);
+            return usuario?.Id ?? 0;
         }
 
         public ActionResult Tablero()
         {
-            var model = _proyectoService.ObtenerTodos();
+            int usuarioId = ObtenerUsuarioActualId();
+
+            if (usuarioId == 0) return RedirectToAction("Login", "Usuarios");
+
+            var model = _proyectoService.ObtenerPorUsuario(usuarioId);
             return View(model);
         }
 
@@ -29,8 +43,14 @@ namespace Timely.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Proyectos proyecto)
         {
+            proyecto.UsuarioId = ObtenerUsuarioActualId();
+
             try
             {
+                // 2. Le dices al validador que ignore que estos campos no vinieron del HTML
+                ModelState.Remove("Usuario");
+                ModelState.Remove("UsuarioId");
+
                 if (ModelState.IsValid)
                 _proyectoService.AgregarProyecto(proyecto);
                 return RedirectToAction(nameof(Tablero));
@@ -47,7 +67,15 @@ namespace Timely.Controllers
         public ActionResult Delete(int id)
         {
             var proyecto = _proyectoService.BuscarPorId(id);
+            if (proyecto == null) return NotFound();
+
+            if (proyecto.UsuarioId != ObtenerUsuarioActualId())
+            {
+                return Unauthorized();
+            }
+
             return View(proyecto);
+
         }
 
         // El borrado real solo ocurre desde POST
@@ -58,6 +86,10 @@ namespace Timely.Controllers
             try
             {
                 var proyecto = _proyectoService.BuscarPorId(id);
+                if (proyecto.UsuarioId != ObtenerUsuarioActualId())
+                {
+                    return Unauthorized();
+                }
                 _proyectoService.EliminarProyecto(proyecto);
                 return RedirectToAction(nameof(Tablero));
             }
@@ -71,6 +103,13 @@ namespace Timely.Controllers
         public ActionResult Edit(int id)
         {
             var proyecto = _proyectoService.BuscarPorId(id);
+            if (proyecto == null) return NotFound();
+
+            if (proyecto.UsuarioId != ObtenerUsuarioActualId()) //En caso de que el proyecto no le pertenezca, se expulsa al usuario
+            {
+                return Unauthorized(); //Proximamente se redirigira a otra vista
+            }
+
             return View(proyecto);
         }
 
@@ -78,6 +117,14 @@ namespace Timely.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Proyectos proyecto)
         {
+            proyecto.UsuarioId = ObtenerUsuarioActualId();
+
+            var proyectoOriginal = _proyectoService.BuscarPorId(proyecto.Id);
+            if (proyectoOriginal.UsuarioId != proyecto.UsuarioId)
+            {
+                return Unauthorized();
+            }
+
             try
             {
                 if (ModelState.IsValid)
@@ -111,7 +158,7 @@ namespace Timely.Controllers
 
             var proyecto = _proyectoService.BuscarPorId(id);
 
-            proyecto.Estado = completado ? "Hecho" : ResolverEstadoPorFecha(proyecto);
+            proyecto.Completado = completado;
             _proyectoService.ActualizarProyecto(proyecto);
 
             return Json(new

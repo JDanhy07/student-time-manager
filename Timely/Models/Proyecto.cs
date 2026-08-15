@@ -1,4 +1,7 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Timely.Models
 {
 	public class Proyectos
@@ -12,7 +15,7 @@ namespace Timely.Models
 
 		public DateTime Vence { get; set; }
 
-		public string Estado;
+		public string Estado { get; set; }
 
         private bool _completado;
 
@@ -32,6 +35,12 @@ namespace Timely.Models
 				Estado = _completado ? "Hecho" : (DateTime.Now > Vence ? "Vencido" : "En proceso");
 			}
 		}
+
+		[Required]
+		public int UsuarioId { get; set; }
+
+		[ForeignKey("UsuarioId")]
+		public virtual Usuarios Usuario { get; set; }
 
 		// Clase anidada que sirve como DTO (Data Transfer Object) para actualizar el estado del proyecto
 		public class EstadoUpdateDto

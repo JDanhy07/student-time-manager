@@ -21,9 +21,11 @@ namespace Timely.Services
             Console.WriteLine($"Proyecto agregado: {proyecto.Nombre}, ID: {proyecto.Id}"); 
         }
 
-        public List<Proyectos> ObtenerTodos()
+        public List<Proyectos> ObtenerPorUsuario(int usuarioId)
         {
-            return _context.Proyectos.ToList();
+            return _context.Proyectos
+                .Where(p => p.UsuarioId == usuarioId)
+                .ToList();
         }
 
         public Proyectos BuscarPorId(int id)
@@ -39,6 +41,7 @@ namespace Timely.Services
             existente.Fecha_de_inicio = proyecto.Fecha_de_inicio;
             existente.Vence = proyecto.Vence;
             existente.Estado = proyecto.Estado;
+            existente.Completado = proyecto.Completado;
             _context.SaveChanges();
         }
 

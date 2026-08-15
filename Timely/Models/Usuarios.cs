@@ -13,7 +13,7 @@ namespace Timely.Models
         public string Usuario { get; set; }
 
         [Required(ErrorMessage = "La contraseña es obligatoria")]
-        public int Contrasena { get; set; }
+        public string Contrasena { get; set; }
 
         [Required]
         public string Perfil { get; set; }
@@ -27,6 +27,6 @@ namespace Timely.Models
 
         [NotMapped]
         [Compare("Contrasena", ErrorMessage = "Las contraseñas no coinciden")]
-        public int Confirmacion { get; set; }
+        public string Confirmacion { get; set; }
     }
 }

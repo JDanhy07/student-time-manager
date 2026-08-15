@@ -19,9 +19,11 @@ namespace Timely.Services
             _context.SaveChanges();
         }
 
-        public List<Nota> ObtenerTodas()
+        public List<Nota> ObtenerPorUsuario(int usuarioId)
         {
-            return _context.Notas.ToList();
+            return _context.Notas.ToList()
+                                 .Where(n => n.UsuarioId == usuarioId)
+                                 .ToList();
         }
 
         public Nota BuscarPorId(int id)
