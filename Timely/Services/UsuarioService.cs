@@ -44,6 +44,7 @@ namespace Timely.Services
             {
                 existente.Contrasena = _passwordHasher.HashPassword(existente, usuario.Contrasena);
             }
+            existente.Rol = usuario.Rol;
             existente.Perfil = usuario.Perfil;
             existente.Correo = usuario.Correo;
             existente.Fecha = usuario.Fecha;

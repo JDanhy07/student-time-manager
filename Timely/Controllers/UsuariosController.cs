@@ -49,6 +49,9 @@ namespace Timely.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Usuarios user) //IMPORTANTE: ponerlo de nombre diferente al modelo para evitar conflictos de binding
         {
+            user.Rol = "Estudiante"; // Asigna el rol "Estudiante" al usuario creado
+            ModelState.Remove("Rol"); // Elimina la validación del rol, ya que lo estamos asignando manualmente
+
             try
             {
                 if (ModelState.IsValid)
@@ -79,7 +82,7 @@ namespace Timely.Controllers
                 if (usuarioEncontrado != null)
                 {
                     // Crea los claims para establecer la sesión y rol
-                    var rol = usuarioEncontrado.Perfil;
+                    var rol = usuarioEncontrado.Rol;
                     var claims = new List<Claim>()
                     {
                         new Claim(ClaimTypes.Name, usuarioEncontrado.Usuario),

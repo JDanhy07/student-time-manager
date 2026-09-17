@@ -15,8 +15,10 @@ namespace Timely.Models
         [Required(ErrorMessage = "La contraseña es obligatoria")]
         public string Contrasena { get; set; }
 
+        public string? Perfil { get; set; } //Ahora es solo     informativo/preferencias, no se usa para control de acceso.
+
         [Required]
-        public string Perfil { get; set; }
+        public string Rol { get; set; } = "Estudiante"; // Valor predeterminado
 
         [Required]
         [EmailAddress]
