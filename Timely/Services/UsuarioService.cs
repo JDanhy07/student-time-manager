@@ -40,7 +40,7 @@ namespace Timely.Services
         {
             var existente = BuscarPorId(usuario.Id);
             existente.Usuario = usuario.Usuario;
-            if (!string.IsNullOrEmpty(usuario.Contrasena) && usuario.Contrasena != existente.Contrasena)
+            if (!string.IsNullOrEmpty(usuario.Contrasena))
             {
                 existente.Contrasena = _passwordHasher.HashPassword(existente, usuario.Contrasena);
             }

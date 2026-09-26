@@ -1,0 +1,16 @@
+﻿@using Microsoft.AspNetCore.Authorization;
+
+@{
+
+    ViewData["Tittle"] = "Acceso Denegado";
+
+}
+
+<div class="text-center" style="margin-top: 60px;">
+    <h2 class="text-danger"> Acceso Denegado</h2>
+    <p class="lead"> No tienes los permisos necesarios para ver esta pagina.</p>
+    <p>En caso de un error, contacta a un administrador del sistema.</p>
+    <a asp-controller="Usuarios" asp-action="Index" class="btn btn-primary"> Volver al inicio</a>
+</div>
+
+

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using Timely.Models;
 using Timely.Services;
@@ -121,31 +122,49 @@ namespace Timely.Controllers
             return View(); // Vista por defecto si algo sale mal
         }
 
+        [AllowAnonymous]
+        public ActionResult AccesoDenegado()
+        {
+            return View();
+        }
 
+        [HttpGet]
         [Authorize(Roles = "Administrador")]
         public ActionResult Edit(int id)
         {
             var usuario = _usuarioService.BuscarPorId(id);
+            usuario.Contrasena = string.Empty;
+            usuario.Confirmacion = string.Empty;
             return View(usuario);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Usuarios usuario)
+        public ActionResult Edit(Usuarios model) //Se nombra "model" para evitar conflictos
         {
-            try
+            if (string.IsNullOrEmpty(model.Contrasena))
             {
-                if (!ModelState.IsValid)
-                    return View(usuario);
+                ModelState.Remove("Contrasena");
+                ModelState.Remove("Confirmacion");
+                model.Contrasena = null;
+            } else if (model.Contrasena != model.Confirmacion)
+            {
+                ModelState.AddModelError("Confirmacion", "Las contraseñas no coinciden");
+            }
 
-                _usuarioService.ActualizarUsuario(usuario);
-                return RedirectToAction(nameof(Lista));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                return View(usuario);
-            }
+                try
+                {
+                    if (!ModelState.IsValid)
+                        return View(model);
+
+                    _usuarioService.ActualizarUsuario(model);
+                    return RedirectToAction(nameof(Lista));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                    return View(model);
+                }
         }
 
         [Authorize(Roles = "Administrador")]
@@ -171,6 +190,35 @@ namespace Timely.Controllers
                 return RedirectToAction(nameof(Lista));
             }
         }
+
+        [Authorize(Roles = "Administrador")]
+        public ActionResult CreateLista()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateLista(Usuarios user)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _usuarioService.AgregarUsuario(user);
+                    return RedirectToAction(nameof(Lista));
+                }
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear usuario desde la administracion");
+                ModelState.AddModelError("", "Error: " + ex.Message);
+            }
+
+            return View(user);
+        } 
+        
 
         [Authorize]
         public ActionResult MiPerfil()

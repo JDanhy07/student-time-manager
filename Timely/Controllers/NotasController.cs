@@ -60,6 +60,7 @@ namespace Timely.Controllers
             }
         }
 
+        [HttpGet]
         public ActionResult Edit(int id)
         {
             var nota = _notaService.BuscarPorId(id);
@@ -92,7 +93,7 @@ namespace Timely.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(nota);
+                return View();
             }
         }
 

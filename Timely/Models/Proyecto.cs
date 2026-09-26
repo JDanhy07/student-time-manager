@@ -40,7 +40,7 @@ namespace Timely.Models
 		public int UsuarioId { get; set; }
 
 		[ForeignKey("UsuarioId")]
-		public virtual Usuarios Usuario { get; set; }
+		public virtual Usuarios? Usuario { get; set; }
 
 		// Clase anidada que sirve como DTO (Data Transfer Object) para actualizar el estado del proyecto
 		public class EstadoUpdateDto
