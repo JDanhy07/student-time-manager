@@ -1,12 +1,613 @@
-﻿body {
-	font-family:"Bitstream Vera Sans",Verdana,Arial,Helvetica,Sans,"Bitstream Vera Serif";
-	font-size: 0.75em;
-	width:100%;
-	margin: 0;
-	padding: 0;
-	color: #000;
+﻿/* =====================================================================
+   TIMELY - style.css (unificado)
+   Paleta: lila (primario) + azul cielo (acento) sobre fondo lila claro
+   ===================================================================== */
+
+:root {
+	--c-bg: #f9f7ff;
+	--c-surface: #ffffff;
+	--c-text: #2d2a3e;
+	--c-muted: #6b6880;
+	--c-primary: #6a5acd;
+	--c-primary-dark: #483d8b;
+	--c-primary-soft: #ece9fb;
+	--c-accent: #73cbf0;
+	--c-accent-text: #007b9e;
+	--c-nav: #e6f2ff;
+	--c-nav-soft: #cfe2ff;
+	--c-border: #e4e0f5;
+	--radius: 12px;
+	--shadow-sm: 0 2px 8px rgba(106, 90, 205, .10);
+	--shadow-md: 0 6px 18px rgba(106, 90, 205, .16);
 }
 
+/* ---------- Base ---------- */
+body {
+	font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+	font-size: 0.75em; /* tamaño original del sitio (12px) */
+	background-color: var(--c-bg);
+	color: var(--c-text);
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	max-width: 1000px;
+	margin: 20px auto;
+	padding: 20px;
+}
+
+h11, .page-title {
+	font-size: 28px;
+	color: var(--c-text);
+}
+
+label:not(.form-check-label) {
+	font-weight: bold;
+	display: block;
+	margin-top: 10px;
+}
+
+input[type="text"],
+textarea {
+	width: 100%;
+	padding: 10px;
+	margin-top: 5px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 16px;
+}
+
+/* ---------- Botones de Bootstrap con la paleta del sitio ---------- */
+.btn-primary {
+	background-color: var(--c-primary);
+	border-color: var(--c-primary);
+}
+
+	.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+		background-color: var(--c-primary-dark) !important;
+		border-color: var(--c-primary-dark) !important;
+	}
+
+.btn-outline-primary {
+	color: var(--c-primary);
+	border-color: var(--c-primary);
+}
+
+	.btn-outline-primary:hover {
+		background-color: var(--c-primary);
+		border-color: var(--c-primary);
+		color: #fff;
+	}
+
+/* ---------- Barra de navegación ---------- */
+.navbar {
+	background: var(--c-nav-soft);
+	padding: 10px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+	.navbar a {
+		text-decoration: none;
+		background: #d6e4ff;
+		color: #333;
+		padding: 8px 15px;
+		border-radius: 20px;
+		margin: 5px;
+		font-weight: bold;
+		border: 2px solid transparent;
+		transition: 0.3s;
+	}
+
+		.navbar a:hover {
+			background: #b0c4ff;
+			border: 2px solid var(--c-primary);
+		}
+
+	.navbar .btn-outline-info {
+		border-radius: 17px;
+		transition: all 0.3s ease-in-out;
+		border-color: var(--c-accent);
+		background-color: rgba(135, 206, 235, 0.2);
+		color: var(--c-accent-text);
+		font-weight: bold;
+	}
+
+		.navbar .btn-outline-info:hover {
+			background-color: rgba(135, 206, 235, 0.5);
+			color: white;
+			transition: 0.5s ease-in-out;
+		}
+		/* Opcional: agrega la clase "active" al link de la sección actual */
+		.navbar .btn-outline-info.active {
+			background-color: var(--c-primary);
+			border-color: var(--c-primary);
+			color: #fff;
+		}
+
+@media (max-width: 768px) {
+	#menu .navbar-nav {
+		text-align: center;
+		width: 100%;
+	}
+
+	#menu .btn-outline-info {
+		margin: 5px auto;
+		width: 80%;
+		display: inline-block;
+	}
+}
+
+/* ---------- Estados (proyectos) ---------- */
+.estado span,
+.estado-vencido, .estado-proceso, .estado-en-proceso, .estado-normal, .estado-inactivo {
+	display: inline-block;
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.estado-vencido {
+	background: #ffcccc;
+	color: #b22222;
+	border: 1px solid #b22222;
+}
+
+.estado-proceso,
+.estado-en-proceso {
+	background: #fff3cd;
+	color: #856404;
+	border: 1px solid #856404;
+}
+
+.estado-normal {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #155724;
+}
+
+.estado-inactivo {
+	background: #cce5ff;
+	color: #004085;
+	border: 1px solid #004085;
+}
+
+/* ---------- Tablas ---------- */
+table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+td {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	white-space: normal;
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+	background: white;
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: var(--shadow-sm);
+}
+
+	.table th, .table td {
+		padding: 12px;
+		text-align: left;
+		border-bottom: 1px solid #ddd;
+	}
+
+	.table th {
+		background: var(--c-nav-soft);
+		font-weight: bold;
+	}
+
+/* ---------- Formularios (Create de notas, etc.) ---------- */
+.create-container {
+	max-width: 600px;
+	margin: 40px auto;
+	padding: 20px;
+	background: #f8f9fa;
+	border-radius: 8px;
+	box-shadow: var(--shadow-sm);
+}
+
+.form-card {
+	padding: 20px;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+	/* Antes era un "button" global; ahora solo afecta a estos formularios */
+	.create-container button,
+	.form-card button {
+		width: 100%;
+		background: var(--c-primary);
+		color: white;
+		border: none;
+		padding: 10px;
+		font-size: 16px;
+		border-radius: 5px;
+		cursor: pointer;
+		margin-top: 15px;
+		transition: background 0.3s;
+	}
+
+		.create-container button:hover,
+		.form-card button:hover {
+			background: var(--c-primary-dark);
+		}
+
+.back-link {
+	display: inline-block;
+	margin-top: 15px;
+	color: var(--c-primary);
+	text-decoration: none;
+}
+
+	.back-link:hover {
+		text-decoration: underline;
+	}
+
+/* ---------- Notas ---------- */
+.folder {
+	margin-bottom: 30px;
+	background: #fff;
+	padding: 15px;
+	border-radius: 10px;
+	box-shadow: var(--shadow-sm);
+}
+
+.folder-title {
+	font-size: 22px;
+	color: var(--c-primary);
+	border-bottom: 2px solid var(--c-primary);
+	padding-bottom: 5px;
+}
+
+.note-card {
+	background: #fefefe;
+	border-left: 5px solid var(--c-primary);
+	padding: 15px;
+	margin: 10px 0;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.note-content {
+	font-size: 16px;
+	color: #555;
+}
+
+.crear-nota {
+	display: inline-block;
+	background: var(--c-primary);
+	color: white;
+	padding: 8px 15px;
+	border-radius: 5px;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+	.crear-nota:hover {
+		background: var(--c-primary-dark);
+	}
+
+/* ---------- Acciones (editar / eliminar) ---------- */
+.actions {
+	text-align: right;
+	margin-top: 10px;
+}
+
+	.actions a {
+		text-decoration: none;
+		font-weight: bold;
+		margin-right: 10px;
+	}
+
+.btn-edit {
+	text-decoration: none;
+	color: var(--c-primary);
+	font-weight: bold;
+}
+
+	.btn-edit:hover {
+		color: var(--c-primary-dark);
+	}
+
+.btn-delete {
+	text-decoration: none;
+	color: red;
+	font-weight: bold;
+}
+
+	.btn-delete:hover {
+		color: darkred;
+	}
+
+.actions .btn-edit:hover, .actions .btn-delete:hover {
+	text-decoration: underline;
+}
+
+/* =====================================================================
+   DASHBOARD (Hogar / Inicio)
+   ===================================================================== */
+.dash {
+	max-width: 1100px;
+	margin: 0 auto;
+	font-size: 1rem;
+}
+
+.dash-hero {
+	background: linear-gradient(135deg, var(--c-primary) 0%, #7c8cf0 55%, var(--c-accent) 100%);
+	color: #fff;
+	border-radius: 16px;
+	padding: 28px 32px;
+	box-shadow: var(--shadow-md);
+}
+
+	.dash-hero h1 {
+		font-size: clamp(1.5rem, 3vw, 2rem);
+		font-weight: 700;
+		margin: 0 0 4px;
+	}
+
+	.dash-hero p {
+		margin: 0;
+		opacity: .92;
+	}
+
+.dash-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 20px;
+}
+
+.dash-stat {
+	background: rgba(255, 255, 255, .18);
+	border-radius: 12px;
+	padding: 10px 18px;
+	min-width: 130px;
+}
+
+	.dash-stat strong {
+		display: block;
+		font-size: 1.6rem;
+		line-height: 1.1;
+	}
+
+	.dash-stat span {
+		font-size: .8rem;
+		opacity: .95;
+	}
+
+.dash-actions {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 12px;
+	margin: 20px 0;
+}
+
+.dash-action {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: var(--radius);
+	padding: 14px 16px;
+	color: var(--c-text);
+	font-weight: 600;
+	text-decoration: none;
+	box-shadow: var(--shadow-sm);
+	transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+
+	.dash-action:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
+		border-color: var(--c-primary);
+		color: var(--c-primary-dark);
+	}
+
+.dash-action-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: var(--c-primary-soft);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.25rem;
+	flex: 0 0 40px;
+}
+
+.dash-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 20px;
+}
+
+.dash-col {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.dash-card {
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: var(--radius);
+	padding: 20px;
+	box-shadow: var(--shadow-sm);
+}
+
+.dash-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+	.dash-card-header h2 {
+		font-size: 1.1rem;
+		font-weight: 700;
+		margin: 0;
+		color: var(--c-primary);
+	}
+
+.dash-card p {
+	color: var(--c-muted);
+	font-size: .92rem;
+}
+
+.dash-link {
+	font-size: .875rem;
+	font-weight: 600;
+	color: var(--c-primary);
+	text-decoration: none;
+}
+
+	.dash-link:hover {
+		color: var(--c-primary-dark);
+		text-decoration: underline;
+	}
+
+.dash-evento {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--c-border);
+}
+
+	.dash-evento:last-child {
+		border-bottom: none;
+	}
+
+.dash-fecha-badge {
+	flex: 0 0 54px;
+	text-align: center;
+	background: var(--c-primary-soft);
+	color: var(--c-primary-dark);
+	border-radius: 10px;
+	padding: 6px 0;
+}
+
+	.dash-fecha-badge strong {
+		display: block;
+		font-size: 1.3rem;
+		line-height: 1;
+	}
+
+	.dash-fecha-badge span {
+		font-size: .7rem;
+		text-transform: uppercase;
+		letter-spacing: .05em;
+	}
+
+.dash-evento-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.dash-evento-titulo {
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dash-evento-hora {
+	font-size: .85rem;
+	color: var(--c-muted);
+}
+
+.dash-tag {
+	font-size: .7rem;
+	font-weight: 700;
+	padding: 3px 10px;
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
+.dash-tag-hoy {
+	background: var(--c-primary);
+	color: #fff;
+}
+
+.dash-tag-manana {
+	background: #d9f1fb;
+	color: var(--c-accent-text);
+}
+
+.dash-vacio {
+	text-align: center;
+	padding: 24px 8px;
+	color: var(--c-muted);
+}
+
+.dash-vacio-icono {
+	font-size: 2.2rem;
+	margin-bottom: 4px;
+}
+
+.dash-tip {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	margin-top: 20px;
+}
+
+	.dash-tip img {
+		width: 200px;
+		max-width: 35%;
+		height: auto;
+		border-radius: 10px;
+	}
+
+	.dash-tip h2 {
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--c-primary);
+		margin: 0 0 6px;
+	}
+
+	.dash-tip p {
+		margin: 0;
+	}
+
+@media (max-width: 768px) {
+	.dash-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.dash-hero {
+		padding: 22px 20px;
+	}
+
+	.dash-tip {
+		flex-direction: column;
+		text-align: center;
+	}
+
+		.dash-tip img {
+			max-width: 100%;
+			width: 100%;
+		}
+}
+
+/* =====================================================================
+   LEGADO (se conserva por si el layout aún los usa; revisar y podar)
+   ===================================================================== */
+/* Banner superior */
 #top {
 	background: url("bgcus.jpg") no-repeat center center;
 	background-size: cover;
@@ -23,118 +624,59 @@
 
 #slogan {
 	position: absolute;
-	top: 20px;
-	left: 20px;
-	color: white;
-	font-size: clamp(1.2rem, 5vw, 2rem);
-	background: rgba(0,0,0,0.3);
+	top: 5px;
+	left: 10px;
+	color: white !important;
+	font-weight: normal;
+	font-family: Times;
+	font-size: 22px;
+	background: rgba(0, 0, 0, 0.3);
 	padding: 0.2rem 0.8rem;
 	border-radius: 8px;
 }
 
-/* Ajuste del navbar en móviles */
-@media (max-width: 768px) {
-	#menu .navbar-nav {
-		text-align: center;
-		width: 100%;
-	}
-
-	#menu .btn-outline-info {
-		margin: 5px auto;
-		width: 80%;
-		display: inline-block;
-	}
-}
-
-#slogan {
-	top: 5px;
-	left: 10px;
-	position: absolute;
-	color: white !important;
-	font-weight: Normal;
-	font-family: Times;
-	font-size: 22px;
-}
-
+/* Menú */
 #menu {
-	background-color: #e6f2ff;
+	background-color: var(--c-nav);
 	font-size: 10px;
 	font-weight: bold;
 	text-align: right;
 }
-	#menu ul {		
+
+	#menu ul {
 		margin: 0;
 	}
-#menu li {
-	list-style-type: none;
-	display: inline;
-	
-}
-#menu li a {
-	color: #000 !important;
-	text-decoration: none;
-}
-	#menu li a:hover {
-		padding: 8px 30px;
-		border: 10px; /* Mantener el borde siempre igual */
-		box-sizing: border-box; /* Evita que el tamaño cambie */
-		color: #73cbf0;
-		text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+
+	#menu li {
+		list-style-type: none;
+		display: inline;
 	}
+
+		#menu li a {
+			color: #000 !important;
+			text-decoration: none;
+		}
+
 #main {
 	padding: 10px;
-	letter-spacing: .1em;
 	width: 97%;
-	font-family:Tahoma;
 }
-#main a {
-	color: #496f9c;
-	text-decoration: none;
-	font-weight: bold;
-}
-#main a:hover {
-	color: #1c2a3b;
-	text-decoration: none;
-}
-#main .title {
-	font-size: 2em;
-	color: #071B31;
-	font-family:Georgia;
-}
-#main .text {
-	margin: .5em;
-	text-align: justify;
-}
-#main .footie {
-	font-size: 0.75em;
-	text-align: justify;
-	text-align: right;
-	border-bottom: 1px dashed #5e6d84;
-	margin-bottom: 1em;
-	padding-bottom: 1em;
-}
+
+	#main a {
+		color: #496f9c;
+		text-decoration: none;
+		font-weight: bold;
+	}
+
+		#main a:hover {
+			color: #1c2a3b;
+		}
+
 #side {
-	
 	margin: 5px;
 	width: 160px;
 }
-#side .text {
-	
-	margin: 5px;
-	border: 1px solid #adadad;
-	background-color: #ededed;
-}
-#side .text:hover {
-	background-color: #000;
-}
-#side a {
-	color: #496f9c;
-	text-decoration: none;
-}
-#side a:hover {
-	color: #1c2a3b;
-	text-decoration: none;
-}
+
 #footer {
 	clear: both;
 	font-size: .80em;
@@ -142,354 +684,24 @@
 	padding: 10px;
 	background-color: #ededed;
 	bottom: 0;
-	position: fixed
+	position: fixed;
 }
-#footer a {
-	color: #496f9c;
-	text-decoration: none;
-}
-#footer a:hover {
-	color: #1c2a3b;
-	text-decoration: none;
-}
-#footer .left {
-	text-align: left;
-	float: left;
-}
+
+	#footer a {
+		color: #496f9c;
+		text-decoration: none;
+	}
+
+		#footer a:hover {
+			color: #1c2a3b;
+		}
+
+	#footer .left {
+		text-align: left;
+		float: left;
+	}
+
 	#footer .right {
 		text-align: right;
 		float: right;
 	}
-	
-
-.estado span {
-	padding: 5px 10px;
-	border-radius: 5px;
-	font-weight: bold;
-}
-
-.estado-vencido {
-	background-color: #ffcccc; /* Rojo claro */
-	color: #a00000;
-	border: 1px solid #a00000;
-}
-
-.estado-proceso {
-	background-color: #fff3cd; /* Amarillo claro */
-	color: #856404;
-	border: 1px solid #856404;
-}
-
-.estado-normal {
-	background-color: #d4edda; /* Verde claro */
-	color: #155724;
-	border: 1px solid #155724;
-}
-
-.navbar .btn-outline-info {
-	border-radius: 17px;
-	transition: all 0.3s ease-in-out;
-	border-color: #73cbf0;
-	background-color: rgba(135, 206, 235, 0.2);
-	color: #007b9e;
-	font-weight: bold;
-}
-
-	.navbar .btn-outline-info:hover {
-		background-color: rgba(135, 206, 235, 0.5); /* Esto va hacer que aumente el tamaño a la hora de pasar el mause chiquilles */
-		color: white;
-		transition: 0.5s ease-in-out;
-	}
-	/*---------------------------------------------------------------------- ESTE ES EL CREATE DE NOTAS*/
-
-/* Contenedor principal del formulario */
-.create-container {
-	max-width: 600px;
-	margin: 40px auto;
-	padding: 20px;
-	background: #f8f9fa;
-	border-radius: 8px;
-	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Estiliza la tarjeta del formulario */
-.form-card {
-	padding: 20px;
-	background: white;
-	border-radius: 8px;
-	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Etiquetas de los inputs */
-label {
-	font-weight: bold;
-	display: block;
-	margin-top: 10px;
-}
-
-/* Campos de entrada */
-input[type="text"],
-textarea {
-	width: 100%;
-	padding: 10px;
-	margin-top: 5px;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	font-size: 16px;
-}
-
-/* Botón de guardar */
-button {
-	width: 100%;
-	background: #007bff;
-	color: white;
-	border: none;
-	padding: 10px;
-	font-size: 16px;
-	border-radius: 5px;
-	cursor: pointer;
-	margin-top: 15px;
-	transition: background 0.3s;
-}
-
-	button:hover {
-		background: #0056b3;
-	}
-
-/* Enlace de volver */
-.back-link {
-	display: inline-block;
-	margin-top: 15px;
-	color: #007bff;
-	text-decoration: none;
-}
-
-	.back-link:hover {
-		text-decoration: underline;
-	}
-
-/* Evita que el texto largo haga que la tabla se expanda demasiado */
-table {
-	table-layout: fixed;
-	width: 100%;
-}
-
-/* Hace que el contenido de la celda se ajuste y rompa las palabras largas */
-td {
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	white-space: normal;
-}
-/*------------------------------------------------------------------------- EL CSS DE NOTAS*/
-
-
-body {
-	font-family: 'Segoe UI', sans-serif;
-	background-color: #f9f7ff; /* Fondo lila claro */
-	color: #333;
-	margin: 0;
-	padding: 0;
-}
-
-.container {
-	max-width: 800px;
-	margin: 20px auto;
-	padding: 20px;
-}
-
-/* Estilo para cada carpeta de notas */
-.folder {
-	margin-bottom: 30px;
-	background: #fff;
-	padding: 15px;
-	border-radius: 10px;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Título de cada carpeta */
-.folder-title {
-	font-size: 22px;
-	color: #6a5acd; /* Lila */
-	border-bottom: 2px solid #6a5acd;
-	padding-bottom: 5px;
-}
-
-/* Tarjetas de notas */
-.note-card {
-	background: #fefefe;
-	border-left: 5px solid #6a5acd;
-	padding: 15px;
-	margin: 10px 0;
-	border-radius: 8px;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.note-content {
-	font-size: 16px;
-	color: #555;
-}
-
-/* Acciones */
-.actions {
-	text-align: right;
-	margin-top: 10px;
-}
-
-.btn-edit {
-	text-decoration: none;
-	color: #6a5acd;
-	font-weight: bold;
-}
-
-	.btn-edit:hover {
-		color: #483d8b;
-	}
-
-.btn-delete {
-	text-decoration: none;
-	color: red;
-	font-weight: bold;
-}
-
-	.btn-delete:hover {
-		color: darkred;
-	}
-
-/* Botón para agregar notas */
-.crear-nota {
-	display: inline-block;
-	background: #6a5acd;
-	color: white;
-	padding: 8px 15px;
-	border-radius: 5px;
-	text-decoration: none;
-	font-weight: bold;
-}
-
-	.crear-nota:hover {
-		background: #483d8b;
-	}
-
-	/*----------------------------------------------------------------------------------- MIS PROYECTOS*/
-
-body {
-	font-family: 'Segoe UI', sans-serif;
-	background-color: #f9f7ff; /* Lila claro */
-	color: #333;
-	margin: 0;
-	padding: 0;
-}
-
-/* Contenedor principal */
-.container {
-	max-width: 1000px;
-	margin: 20px auto;
-	padding: 20px;
-}
-
-/* Encabezado */
-h11 {
-	font-size: 28px;
-	color: #333;
-}
-
-/* Estilo para la barra de navegación */
-.navbar {
-	background: #cfe2ff; /* Azul pastel */
-	padding: 10px 20px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-
-	/* Botones de la barra de navegación */
-	.navbar a {
-		text-decoration: none;
-		background: #d6e4ff;
-		color: #333;
-		padding: 8px 15px;
-		border-radius: 20px;
-		margin: 5px;
-		font-weight: bold;
-		border: 2px solid transparent;
-		transition: 0.3s;
-	}
-
-		.navbar a:hover {
-			background: #b0c4ff;
-			border: 2px solid #6a5acd;
-		}
-
-/* Tabla de proyectos */
-.table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 15px;
-	background: white;
-	border-radius: 10px;
-	overflow: hidden;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-	.table th, .table td {
-		padding: 12px;
-		text-align: left;
-		border-bottom: 1px solid #ddd;
-	}
-
-	.table th {
-		background: #cfe2ff;
-		font-weight: bold;
-	}
-
-/* Estados con colores pastel */
-.estado-vencido {
-	background: #ffcccc;
-	color: #b22222;
-	padding: 5px 10px;
-	border-radius: 5px;
-	font-weight: bold;
-}
-
-.estado-en-proceso {
-	background: #fff4b2;
-	color: #8b8000;
-	padding: 5px 10px;
-	border-radius: 5px;
-	font-weight: bold;
-}
-
-.estado-inactivo {
-	background: #cce5ff;
-	color: #004085;
-	padding: 5px 10px;
-	border-radius: 5px;
-	font-weight: bold;
-}
-
-/* Botones de acciones */
-.actions a {
-	text-decoration: none;
-	font-weight: bold;
-	margin-right: 10px;
-}
-
-.actions .btn-edit {
-	color: #6a5acd;
-}
-
-	.actions .btn-edit:hover {
-		text-decoration: underline;
-	}
-
-.actions .btn-delete {
-	color: red;
-}
-
-	.actions .btn-delete:hover {
-		text-decoration: underline;
-	}
-	
-
-
-

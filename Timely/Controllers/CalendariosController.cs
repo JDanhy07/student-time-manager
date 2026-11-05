@@ -69,13 +69,16 @@ namespace Timely.Controllers
         {
             evento.UsuarioId = ObtenerUsuarioActualId();
 
+            ModelState.Remove("Usuario");
+            ModelState.Remove("UsuarioId");
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Datos incompletos" });
+
             var eventoOriginal = _calendarioService.ObtenerEventoPorId(evento.Id);
             if (eventoOriginal == null) return NotFound(new { success = false, message = "Evento no encontrado" });
 
             if (eventoOriginal.UsuarioId != evento.UsuarioId)
-            {
                 return Unauthorized(new { success = false, message = "No tienes permiso para editar este evento" });
-            }
 
             _calendarioService.EditarEvento(evento);
             return Json(new { success = true, message = "Evento actualizado" });

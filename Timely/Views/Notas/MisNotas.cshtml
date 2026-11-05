@@ -18,6 +18,7 @@
             @foreach (var item in grupo)
             {
                 <div class="note-card">
+                    <div class="blockquote-footer">@Html.DisplayFor(modelItem => item.Titulo)</div>
                     <div class="note-content">@Html.DisplayFor(modelItem => item.Contenido)</div>
                     <div class="actions">
                         @Html.ActionLink("Editar", "Edit", new { id = item.Id }, new { @class = "btn-edit" }) |

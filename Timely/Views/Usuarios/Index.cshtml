@@ -1,114 +1,132 @@
-﻿@model IEnumerable<Timely.Models.Usuarios>
+﻿@using System.Globalization
+@model Timely.Models.HogarDashboardViewModel
 
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Inicio";
+
+    var es = new CultureInfo("es-CR");
+    var hoy = DateTime.Today;
+
+    string Etiqueta(DateTime d) =>
+        d.Date == hoy ? "Hoy" : d.Date == hoy.AddDays(1) ? "Mañana" : "";
+
+    string Horario(Timely.Models.EventoResumen ev)
+    {
+        bool todoDia = ev.Inicio.TimeOfDay == TimeSpan.Zero
+                       && ev.Fin.HasValue && ev.Fin.Value.TimeOfDay >= new TimeSpan(23, 59, 0);
+        if (todoDia) return "Todo el día";
+        var texto = ev.Inicio.ToString("HH:mm");
+        if (ev.Fin.HasValue) texto += " – " + ev.Fin.Value.ToString("HH:mm");
+        return texto;
+    }
+
+    var saludo = Model.Saludo + (string.IsNullOrWhiteSpace(Model.NombreUsuario) ? "" : ", " + Model.NombreUsuario);
 }
 
-<style>
-    /* Estilos responsivos para la página de inicio */
-    .hero-text {
-        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-        font-size: 1.125rem; /* 18px en desktop, escalable */
-        line-height: 1.6;
-    }
+<div class="dash">
 
-    .hero-title {
-        font-size: 1.75rem; /* 28px */
-        line-height: 1.6;
-    }
+    <!-- Saludo -->
+    <section class="dash-hero">
+        <h1>@saludo 👋</h1>
+        <p>@Model.FechaHoy</p>
 
-    .contenedor-flex {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-    }
+        <div class="dash-stats">
+            <div class="dash-stat">
+                <strong>@Model.EventosHoy</strong>
+                <span>@(Model.EventosHoy == 1 ? "evento hoy" : "eventos hoy")</span>
+            </div>
+            <div class="dash-stat">
+                <strong>@Model.EventosSemana</strong>
+                <span>próximos 7 días</span>
+            </div>
+        </div>
+    </section>
 
-        .contenedor-flex .texto {
-            flex: 2;
-            min-width: 250px;
-        }
+    <!-- Accesos rápidos -->
+    <section class="dash-actions">
+        <a class="dash-action" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">
+            <span class="dash-action-icon">📅</span> Nuevo evento
+        </a>
+        <a class="dash-action" asp-controller="Notas" asp-action="Create">
+            <span class="dash-action-icon">📝</span> Nueva nota
+        </a>
+        <a class="dash-action" asp-controller="Proyectos" asp-action="Create">
+            <span class="dash-action-icon">📁</span> Nuevo proyecto
+        </a>
+    </section>
 
-        .contenedor-flex .imagen {
-            flex: 1;
-            min-width: 200px;
-        }
+    <div class="dash-grid">
 
-        .contenedor-flex img {
-            width: 100%;
-            border-radius: 8px;
-            height: auto;
-            object-fit: cover;
-        }
+        <!-- Próximos eventos -->
+        <section class="dash-card">
+            <div class="dash-card-header">
+                <h2>Próximos eventos</h2>
+                <a class="dash-link" asp-controller="Calendarios" asp-action="Index">Ver calendario →</a>
+            </div>
 
-    /* Invertir orden en móviles si es necesario */
-    @@media (max-width: 768px) {
-        .contenedor-flex
+            @if (Model.ProximosEventos.Any())
+            {
+                foreach (var ev in Model.ProximosEventos)
+                {
+                    var etiqueta = Etiqueta(ev.Inicio);
+                    <div class="dash-evento">
+                        <div class="dash-fecha-badge">
+                            <strong>@ev.Inicio.Day</strong>
+                            <span>@ev.Inicio.ToString("MMM", es).TrimEnd('.')</span>
+                        </div>
+                        <div class="dash-evento-info">
+                            <div class="dash-evento-titulo">@ev.Titulo</div>
+                            <div class="dash-evento-hora">🕓 @Horario(ev)</div>
+                        </div>
+                        @if (etiqueta == "Hoy")
+                        {
+                            <span class="dash-tag dash-tag-hoy">Hoy</span>
+                        }
+                        else if (etiqueta == "Mañana")
+                        {
+                            <span class="dash-tag dash-tag-manana">Mañana</span>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="dash-vacio">
+                    <div class="dash-vacio-icono">🎉</div>
+                    <div>No tienes eventos próximos.</div>
+                    <a class="btn btn-primary mt-3" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">Crear un evento</a>
+                </div>
+            }
+        </section>
 
-    {
-        flex-direction: column;
-    }
+        <!-- Columna derecha -->
+        <div class="dash-col">
+            <section class="dash-card">
+                <div class="dash-card-header">
+                    <h2>Notas</h2>
+                </div>
+                <p>Guarda apuntes e ideas importantes organizados por carpeta.</p>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Notas" asp-action="Index">Ir a mis notas</a>
+            </section>
 
-    .contenedor-flex.reverse {
-        flex-direction: column-reverse;
-    }
+            <section class="dash-card">
+                <div class="dash-card-header">
+                    <h2>Proyectos</h2>
+                </div>
+                <p>Da seguimiento a tus entregas y fechas límite.</p>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Proyectos" asp-action="Index">Ir a mis proyectos</a>
+            </section>
+        </div>
 
-    .hero-text {
-        font-size: 1rem;
-    }
-
-    .hero-title {
-        font-size: 1.5rem;
-    }
-
-    }
-</style>
-
-<!-- Primera fila: texto a la izquierda, imagen derecha -->
-<div class="contenedor-flex">
-    <div class="texto hero-text">
-        <br />
-        <strong>Timely:</strong> Gestiona tu tiempo, simplifica tu vida.<br /><br />
-
-        Sabemos lo difícil que es organizar tareas, exámenes y vida personal. <br />
-        Por eso creamos Timely, hecho por estudiantes de Ingeniería de Software. <br />
-        Con herramientas simples y efectivas, te ayudamos a priorizar tareas, <br />
-        tomar apuntes importantes y organizar tu calendario en un solo lugar.<br /><br />
-
-        Nuestra misión es que la gestión del tiempo sea simple y efectiva. <br />
-        No solo brindamos herramientas, también estrategias y consejos clave <br />
-        para ayudarte a mejorar tus hábitos de organización y enfoque.<br /><br />
-
-        ¿Listo para tomar el control de tu tiempo con menos estrés? <br />
-        ¡Prueba Timely y mejora tu productividad día a día!
     </div>
-    <div class="imagen">
-        <img src="~/img/gestion-del-tiempo.jpg" alt="Gestión del tiempo" />
-    </div>
-</div>
 
-<!-- Segunda fila: imagen izquierda, texto derecha (en móviles se invierte el orden) -->
-<div class="contenedor-flex reverse">
-    <div class="imagen">
+    <!-- Consejo (reutiliza tu imagen y el mensaje original, en versión corta) -->
+    <section class="dash-card dash-tip">
         <img src="~/img/importancia.jpg" alt="Importancia de gestionar el tiempo" />
-    </div>
-    <div class="texto hero-text">
-        <h1 class="hero-title">¿Por qué es importante gestionar tu tiempo?</h1>
-        <br />
+        <div>
+            <h2>¿Por qué gestionar tu tiempo?</h2>
+            <p>Organizar tus horas reduce el estrés y te da claridad para avanzar en tus metas académicas y personales. Cada minuto cuenta: empieza hoy planificando tu semana.</p>
+        </div>
+    </section>
 
-        Gestionar bien tu tiempo no se trata solo de organizar tareas, <br />
-        sino de construir un camino hacia tus metas personales y académicas. <br />
-        Cuando aprendes a administrar tus horas, puedes ser más productivo, <br />
-        reducir el estrés y encontrar un mejor equilibrio entre el estudio <br />
-        y tu vida personal. <br /><br />
-
-        En Timely creemos que una buena gestión del tiempo te permite <br />
-        avanzar con claridad, tomar decisiones más conscientes y disfrutar <br />
-        de tus logros sin sentirte abrumado. Cada minuto cuenta, y aprender <br />
-        a usarlo bien es una habilidad que transforma tu día a día. <br /><br />
-
-        Empieza a tomar el control de tu tiempo y conviértelo en tu mejor aliado.
-    </div>
 </div>

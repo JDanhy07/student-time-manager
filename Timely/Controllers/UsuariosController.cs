@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using Timely.Models;
+using System.Globalization;
 using Timely.Services;
 using Timely.Services.Interfaces;
 
@@ -14,10 +15,13 @@ namespace Timely.Controllers
     {
         private  IUsuarioService _usuarioService;
         private  ILogger<UsuariosController> _logger;
+        private readonly ICalendarioService _calendarioService;
+        private static bool TryFecha(string texto, out DateTime fecha) => DateTime.TryParse(texto, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha);
 
-        public UsuariosController(IUsuarioService usuarioService, ILogger<UsuariosController> logger)
+        public UsuariosController(IUsuarioService usuarioService, ILogger<UsuariosController> logger, ICalendarioService calendarioService)
         {
             _usuarioService = usuarioService;
+            _calendarioService = calendarioService;
             _logger = logger;
         }
 
@@ -27,10 +31,50 @@ namespace Timely.Controllers
             return View();
         }
 
+        [Authorize]
         public ActionResult Index()
         {
-            var model = _usuarioService.ObtenerTodos();
-            return View(model);
+            var es = new CultureInfo("es-CR");
+            var ahora = DateTime.Now;
+            var hoy = ahora.Date;
+
+            var usuario = _usuarioService.ObtenerPerfil(User);
+            int usuarioId = usuario?.Id ?? 0;
+
+            // FechaInicio / FechaFinal son string en el modelo, así que se parsean aquí
+            var eventos = new List<EventoResumen>();
+            foreach (var e in _calendarioService.ObtenerEventosPorUsuario(usuarioId))
+            {
+                if (!TryFecha(e.FechaInicio, out var inicio)) continue;
+
+                eventos.Add(new EventoResumen
+                {
+                    Id = e.Id,
+                    Titulo = e.Titulo,
+                    Descripcion = e.Descripcion,
+                    Inicio = inicio,
+                    Fin = TryFecha(e.FechaFinal, out var fin) ? (DateTime?)fin : null
+                });
+            }
+
+            var fechaTexto = ahora.ToString("dddd, d 'de' MMMM 'de' yyyy", es);
+            fechaTexto = char.ToUpper(fechaTexto[0]) + fechaTexto.Substring(1);
+
+            var vm = new HogarDashboardViewModel
+            {
+                NombreUsuario = User.Identity?.Name ?? "",   // es el nombre de usuario (claim Name del Login)
+                Saludo = ahora.Hour < 12 ? "Buenos días" : ahora.Hour < 19 ? "Buenas tardes" : "Buenas noches",
+                FechaHoy = fechaTexto,
+                EventosHoy = eventos.Count(x => x.Inicio.Date == hoy),
+                EventosSemana = eventos.Count(x => x.Inicio.Date >= hoy && x.Inicio.Date <= hoy.AddDays(7)),
+                ProximosEventos = eventos
+                    .Where(x => (x.Fin ?? x.Inicio) >= ahora)   // incluye los que están en curso
+                    .OrderBy(x => x.Inicio)
+                    .Take(5)
+                    .ToList()
+            };
+
+            return View(vm);
         }
 
         [Authorize(Roles = "Administrador")]
@@ -58,7 +102,7 @@ namespace Timely.Controllers
                 if (ModelState.IsValid)
                 {
                     _usuarioService.AgregarUsuario(user); // Guarda el usuario en la base de datos 
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Login");
                 }
             }
             catch (Exception ex)
@@ -109,7 +153,6 @@ namespace Timely.Controllers
                 }
                 else
                 {
-                    Console.WriteLine("❌ Usuario o contraseña incorrectos.");
                     ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
                     return View("Login"); // Redirige a vista de error
                 }
@@ -230,4 +273,5 @@ namespace Timely.Controllers
             return View(usuario);
         }
     }
+
 }
