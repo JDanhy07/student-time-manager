@@ -105,6 +105,11 @@ namespace Timely.Controllers
                     return RedirectToAction("Login");
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                //Nombre del usuario o correo duplicado
+                ModelState.AddModelError("", ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear usuario");
@@ -130,6 +135,7 @@ namespace Timely.Controllers
                     var rol = usuarioEncontrado.Rol;
                     var claims = new List<Claim>()
                     {
+                        new Claim(ClaimTypes.NameIdentifier, usuarioEncontrado.Id.ToString()), 
                         new Claim(ClaimTypes.Name, usuarioEncontrado.Usuario),
                         new Claim(ClaimTypes.Role, rol)
                     };
@@ -138,7 +144,7 @@ namespace Timely.Controllers
                     var authProperties = new AuthenticationProperties
                     {
                         AllowRefresh = true,
-                        IsPersistent = true
+                        IsPersistent = false, // Cambiar a true si quieres que la sesión persista después de cerrar el navegador
                     };
 
                     // Inicia la sesión del usuario
@@ -165,6 +171,17 @@ namespace Timely.Controllers
             return View(); // Vista por defecto si algo sale mal
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Logout()
+        {
+            //Elimina la cookie de autenticación y cierra la sesión del usuario
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+              HttpContext.Session.Clear(); // Limpia la sesión
+
+            return RedirectToAction("Login");
+        }
+
         [AllowAnonymous]
         public ActionResult AccesoDenegado()
         {
@@ -182,6 +199,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Usuarios model) //Se nombra "model" para evitar conflictos
         {
@@ -218,6 +236,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Administrador")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmado(int id)
         {
@@ -241,6 +260,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         [ValidateAntiForgeryToken]
         public ActionResult CreateLista(Usuarios user)
         {
@@ -251,6 +271,12 @@ namespace Timely.Controllers
                     _usuarioService.AgregarUsuario(user);
                     return RedirectToAction(nameof(Lista));
                 }
+            }
+
+            catch (InvalidOperationException ex)
+            {
+                //Nombre del usuario o correo duplicado
+                ModelState.AddModelError("", ex.Message);
             }
 
             catch (Exception ex)
