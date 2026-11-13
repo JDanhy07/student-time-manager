@@ -52,9 +52,16 @@ namespace Timely.Controllers
                 ModelState.Remove("UsuarioId");
 
                 if (ModelState.IsValid)
-                _proyectoService.AgregarProyecto(proyecto);
-                return RedirectToAction(nameof(Tablero));
+                {
+                   _proyectoService.AgregarProyecto(proyecto);
+                   return RedirectToAction(nameof(Tablero));
+                }
+
+                //Si el modelo no es válido, se devuelve la vista con los errores de validación
+                return View(proyecto);
+
             }
+
             catch
             {
                 ModelState.AddModelError("", "El proyecto que deseas registrar ya está agendado. Intenta con otro.");
@@ -146,17 +153,24 @@ namespace Timely.Controllers
         [HttpGet("vencidos")]
         public async Task<IActionResult> GetProyectosVencidos()
         {
-            var vencidos = await _proyectoService.ObtenerVencidosAsync();
+            // Solo los proyectos vencidos del usuario autenticado
+            var vencidos = await _proyectoService.ObtenerVencidosAsync(ObtenerUsuarioActualId());
             return Ok(vencidos);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult ActualizarEstado([FromBody] JsonElement data)
         {
             int id = data.GetProperty("id").GetInt32();
             bool completado = data.GetProperty("completado").GetBoolean();
 
             var proyecto = _proyectoService.BuscarPorId(id);
+
+            if (proyecto.UsuarioId != ObtenerUsuarioActualId())    
+            {
+                return Unauthorized();
+            }
 
             proyecto.Completado = completado;
             _proyectoService.ActualizarProyecto(proyecto);
@@ -174,7 +188,7 @@ namespace Timely.Controllers
             DateTime hoy = DateTime.Now;
             if (hoy < proyecto.Fecha_de_inicio) return "Inactivo";
             if (hoy > proyecto.Vence) return "Vencido";
-            return "En proceso";
+            return "En proceso";        
         }
     }
 }

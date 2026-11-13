@@ -21,8 +21,7 @@ namespace Timely.Services
 
         public List<Nota> ObtenerPorUsuario(int usuarioId)
         {
-            return _context.Notas.ToList()
-                                 .Where(n => n.UsuarioId == usuarioId)
+            return _context.Notas.Where(n => n.UsuarioId == usuarioId)
                                  .ToList();
         }
 
@@ -35,6 +34,7 @@ namespace Timely.Services
         public void ActualizarNota(Nota nota)
         {
             var existente = BuscarPorId(nota.Id);
+            existente.Titulo = nota.Titulo;
             existente.Contenido = nota.Contenido;
             existente.Carpeta = nota.Carpeta;
             _context.SaveChanges();

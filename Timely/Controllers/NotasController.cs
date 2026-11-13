@@ -50,12 +50,18 @@ namespace Timely.Controllers
                 ModelState.Remove("UsuarioId");
 
                 if (ModelState.IsValid)
-                _notaService.AgregarNota(nota);
-                return RedirectToAction(nameof(MisNotas));
+                {
+                    _notaService.AgregarNota(nota);
+                    return RedirectToAction(nameof(MisNotas));
+                }
+
+                //Si el modelo no es válido, se vuelve a mostrar la vista con los errores de validación
+                return View(nota);
+
             }
             catch 
             {
-                ModelState.AddModelError("", "La nota que deseas añadir ya existe. Intenta con otra.");
+                ModelState.AddModelError("", "No se pudo guardar la nota. Intenta nuevamente.");
                 return View(nota);
             }
         }
@@ -93,7 +99,7 @@ namespace Timely.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View();
+                return View(nota);
             }
         }
 

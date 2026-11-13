@@ -17,8 +17,22 @@ namespace Timely.Services
             _passwordHasher = new PasswordHasher<Usuarios>();
         }
 
+        public void ValidarUnicidad(Usuarios user)
+        {
+            if (_context.Usuarios.Any(u => u.Id != user.Id && u.Usuario == user.Usuario))
+            {
+                throw new InvalidOperationException("El nombre del usuario ya esta en uso. Por favor, elija otro nombre de usuario.");
+            }
+
+            if (_context.Usuarios.Any(u => u.Id != user.Id && u.Correo == user.Correo))
+            {
+                throw new InvalidOperationException("El correo electrónico ya esta en uso. Por favor, elija otro correo electrónico.");
+            }
+        }
+
         public void AgregarUsuario(Usuarios user)
         {
+            ValidarUnicidad(user); //Llamamos al metodo para validar la unicidad antes de agregar el usuario
             user.Contrasena = _passwordHasher.HashPassword(user, user.Contrasena);
 
             _context.Usuarios.Add(user);
@@ -38,6 +52,7 @@ namespace Timely.Services
 
         public void ActualizarUsuario(Usuarios usuario)
         {
+            ValidarUnicidad(usuario); //Llamamos al metodo para validar la unicidad antes de actualizar el usuario
             var existente = BuscarPorId(usuario.Id);
             existente.Usuario = usuario.Usuario;
             if (!string.IsNullOrEmpty(usuario.Contrasena))
@@ -81,6 +96,13 @@ namespace Timely.Services
 
         public Usuarios ObtenerPerfil(ClaimsPrincipal user)
         {
+            // Se prioriza el Id guardado en el claim al iniciar sesión
+            if (int.TryParse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id))
+            {
+                return _context.Usuarios.FirstOrDefault(u => u.Id == id);
+            }
+
+            // Respaldo para cookies emitidas antes de agregar el claim (el nombre ahora es único)
             var nombreUsuario = user.Identity?.Name;
             return _context.Usuarios.FirstOrDefault(u => u.Usuario == nombreUsuario);
         }

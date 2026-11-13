@@ -1,8 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Timely.Models
 {
+    [Index(nameof(Usuario), IsUnique = true)] // Asegura que el nombre de usuario sea único
+    [Index(nameof(Correo), IsUnique = true)] // Asegura que el correo electrónico sea único
+
     public class Usuarios
     {
         [Key]
@@ -22,6 +26,7 @@ namespace Timely.Models
 
         [Required]
         [EmailAddress]
+        [StringLength(100)] 
         public string Correo { get; set; }
 
         [Required (ErrorMessage = "La fecha es obligatoria")]

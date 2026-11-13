@@ -11,14 +11,16 @@
         <h2>Crear nueva nota</h2>
 
         <form asp-action="Create" method="post">
-            <label for="titulo">Título</label>
-            <input type="text" name="Titulo" id="titulo" placeholder="Escribe un título" required>
+            <div asp-validation-summary="All" class="text-danger"></div>
 
-            <label for="contenido">Contenido</label>
-            <textarea name="Contenido" id="contenido" rows="4" placeholder="Escribe tu nota aquí"></textarea>
+            <label asp-for="Titulo">Título</label>
+            <input asp-for="Titulo" type="text" placeholder="Escribe un título" required>
 
-            <label for="carpeta">Carpeta</label>
-            <input type="text" name="Carpeta" id="carpeta" placeholder="Nombre de la carpeta" required>
+            <label asp-for="Contenido">Contenido</label>
+            <textarea asp-for="Contenido" rows="4" placeholder="Escribe tu nota aquí" required></textarea>
+
+            <label asp-for="Carpeta">Carpeta</label>
+            <input asp-for="Carpeta" type="text" placeholder="Nombre de la carpeta" required>
 
             <button type="submit">Guardar Nota</button>
         </form>

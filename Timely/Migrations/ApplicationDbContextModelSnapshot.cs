@@ -135,7 +135,8 @@ namespace Timely.Migrations
 
                     b.Property<string>("Correo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Fecha")
                         .IsRequired()
@@ -154,6 +155,12 @@ namespace Timely.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Correo")
+                        .IsUnique();
+
+                    b.HasIndex("Usuario")
+                        .IsUnique();
 
                     b.ToTable("Usuarios");
                 });

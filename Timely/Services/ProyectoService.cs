@@ -52,10 +52,10 @@ namespace Timely.Services
         }
 
         // EF Core: ToListAsync() viene de Microsoft.EntityFrameworkCore, no de System.Data.Entity
-        public async Task<List<Proyectos>> ObtenerVencidosAsync()
+        public async Task<List<Proyectos>> ObtenerVencidosAsync(int usuarioId)
         {
             return await _context.Proyectos
-                .Where(p => p.Estado == "Vencido")
+                .Where(p => p.UsuarioId == usuarioId && p.Estado == "Vencido")
                 .ToListAsync();
         }
 
