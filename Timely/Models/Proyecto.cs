@@ -11,7 +11,8 @@ namespace Timely.Models
 
 		public required string Nombre { get; set; }
 
-		public DateTime Fecha_de_inicio { get; set; }
+		[Display(Name = "Fecha de inicio")]
+        public DateTime Fecha_de_inicio { get; set; }
 
 		public DateTime Vence { get; set; }
 
