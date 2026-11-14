@@ -45,5 +45,36 @@ namespace Timely.Tests.Services
             Assert.Equal(ana.Id, proyecto.UsuarioId);
             Assert.Equal("Vencido", proyecto.Estado);
         }
+
+        [Fact]
+        public async Task ObtenerVencidosAsync_IncluyeProyectosVencidosAunqueElEstadoGuardadoSigaEnProceso()
+        {
+            var ana = _db.CrearUsuario("ana");
+            var proyecto = _db.CrearProyecto(ana, "En proceso");
+
+            // La fecha pasa sin que nadie edite el proyecto: en la BD el Estado sigue en "En proceso"
+            proyecto.Vence = DateTime.Now.AddMinutes(-5);
+            _db.Context.SaveChanges();
+
+            var vencidos = await _servicio.ObtenerVencidosAsync(ana.Id);
+
+            var resultado = Assert.Single(vencidos);
+            Assert.Equal(proyecto.Id, resultado.Id);
+        }
+
+        [Fact]
+        public async Task ObtenerVencidosAsync_NoIncluyeProyectosCompletadosAunqueYaHayanVencido()
+        {
+            var ana = _db.CrearUsuario("ana");
+            var proyecto = _db.CrearProyecto(ana, "En proceso");
+
+            proyecto.Vence = DateTime.Now.AddMinutes(-5);
+            proyecto.Completado = true;
+            _db.Context.SaveChanges();
+
+            var vencidos = await _servicio.ObtenerVencidosAsync(ana.Id);
+
+            Assert.Empty(vencidos);
+        }
     }
 }
