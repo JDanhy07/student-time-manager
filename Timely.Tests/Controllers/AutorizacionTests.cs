@@ -35,12 +35,11 @@ namespace Timely.Tests.Controllers
             Assert.Contains(autorizaciones, a => a.Roles == "Administrador");
         }
 
-        // Los endpoints JSON de CalendariosController quedan fuera a propósito:
-        // todavía no usan antiforgery (pendiente de la Prioridad 2).
         [Theory]
         [InlineData(typeof(UsuariosController))]
         [InlineData(typeof(ProyectosController))]
         [InlineData(typeof(NotasController))]
+        [InlineData(typeof(CalendariosController))]
         public void TodosLosPostDeLosControllersMvc_ExigenTokenAntiforgery(Type controller)
         {
             var postsSinToken = controller

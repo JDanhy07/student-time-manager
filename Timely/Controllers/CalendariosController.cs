@@ -48,6 +48,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CrearEvento([FromBody] Calendario evento)
         {
             evento.UsuarioId = ObtenerUsuarioActualId();
@@ -65,6 +66,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditarEvento([FromBody] Calendario evento)
         {
             evento.UsuarioId = ObtenerUsuarioActualId();
@@ -85,6 +87,7 @@ namespace Timely.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EliminarEvento([FromBody] int id)
         {
             var evento = _calendarioService.ObtenerEventoPorId(id);
