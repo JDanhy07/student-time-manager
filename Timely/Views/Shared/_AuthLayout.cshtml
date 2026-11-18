@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#162b47" />
+    <title>@ViewData["Title"] - Timely</title>
+    <link rel="preload" href="~/fonts/newsreader-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth">
+        <a href="c:\users\jimen\git\student-time-manager\timely\views\shared\_authlayout.cshtml">c:\users\jimen\git\student-time-manager\timely\views\shared\_authlayout.cshtml</a>
+        <aside class="auth-side">
+            <a class="brand" asp-controller="Usuarios" asp-action="Login">
+                <span class="brand-mark"><partial name="_Icono" model='"clock"' /></span>Timely
+            </a>
+
+            <div class="auth-feats">
+                <p class="auth-lema">Gestiona tu tiempo, simplifica tu vida.</p>
+                <div class="auth-feat"><partial name="_Icono" model='"folder"' /><span>Proyectos con fechas y estados claros</span></div>
+                <div class="auth-feat"><partial name="_Icono" model='"nota"' /><span>Notas organizadas por carpetas</span></div>
+                <div class="auth-feat"><partial name="_Icono" model='"calendar"' /><span>Un calendario para todo lo que sigue</span></div>
+            </div>
+
+            <div class="auth-pie">Hecho por estudiantes de Ingeniería de Software</div>
+        </aside>
+
+        <main class="auth-main">
+            <div class="auth-panel">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

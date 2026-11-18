@@ -21,14 +21,19 @@
     }
 
     var saludo = Model.Saludo + (string.IsNullOrWhiteSpace(Model.NombreUsuario) ? "" : ", " + Model.NombreUsuario);
+
+    var resumen = Model.EventosSemana == 0
+        ? "No tienes eventos en los próximos 7 días."
+        : "Tienes " + Model.EventosSemana + (Model.EventosSemana == 1 ? " evento" : " eventos") + " en los próximos 7 días.";
 }
 
 <div class="dash">
 
     <!-- Saludo -->
     <section class="dash-hero">
-        <h1>@saludo 👋</h1>
-        <p>@Model.FechaHoy</p>
+        <div class="dash-fecha">@Model.FechaHoy</div>
+        <h1>@saludo</h1>
+        <p class="dash-resumen">@resumen</p>
 
         <div class="dash-stats">
             <div class="dash-stat">
@@ -45,13 +50,13 @@
     <!-- Accesos rápidos -->
     <section class="dash-actions">
         <a class="dash-action" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">
-            <span class="dash-action-icon">📅</span> Nuevo evento
+            <partial name="_Icono" model='"calendar"' /> Nuevo evento
         </a>
         <a class="dash-action" asp-controller="Notas" asp-action="Create">
-            <span class="dash-action-icon">📝</span> Nueva nota
+            <partial name="_Icono" model='"nota"' /> Nueva nota
         </a>
         <a class="dash-action" asp-controller="Proyectos" asp-action="Create">
-            <span class="dash-action-icon">📁</span> Nuevo proyecto
+            <partial name="_Icono" model='"folder"' /> Nuevo proyecto
         </a>
     </section>
 
@@ -61,7 +66,7 @@
         <section class="dash-card">
             <div class="dash-card-header">
                 <h2>Próximos eventos</h2>
-                <a class="dash-link" asp-controller="Calendarios" asp-action="Index">Ver calendario →</a>
+                <a class="dash-link" asp-controller="Calendarios" asp-action="Index">Ver calendario <partial name="_Icono" model='"arrow"' /></a>
             </div>
 
             @if (Model.ProximosEventos.Any())
@@ -76,7 +81,7 @@
                         </div>
                         <div class="dash-evento-info">
                             <div class="dash-evento-titulo">@ev.Titulo</div>
-                            <div class="dash-evento-hora">🕓 @Horario(ev)</div>
+                            <div class="dash-evento-hora"><partial name="_Icono" model='"clock"' /> @Horario(ev)</div>
                         </div>
                         @if (etiqueta == "Hoy")
                         {
@@ -92,7 +97,7 @@
             else
             {
                 <div class="dash-vacio">
-                    <div class="dash-vacio-icono">🎉</div>
+                    <partial name="_Icono" model='"calendar"' />
                     <div>No tienes eventos próximos.</div>
                     <a class="btn btn-primary mt-3" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">Crear un evento</a>
                 </div>
@@ -120,7 +125,7 @@
 
     </div>
 
-    <!-- Consejo (reutiliza tu imagen y el mensaje original, en versión corta) -->
+    <!-- Consejo -->
     <section class="dash-card dash-tip">
         <img src="~/img/importancia.jpg" alt="Importancia de gestionar el tiempo" />
         <div>
