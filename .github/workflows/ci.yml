@@ -2,9 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [ main, timely-v2 ]
+    branches: [ '**' ]        # cualquier rama
   pull_request:
-    branches: [ main ]
+    branches: [ main ]        # y los PR hacia main
+  workflow_dispatch:          # también se puede lanzar a mano desde la pestaña Actions
+
+# Si llega un push nuevo a la misma rama, cancela la ejecución anterior que sigue en curso
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-y-pruebas:
