@@ -1397,8 +1397,8 @@ td {
 	gap: 6px;
 }
 
-/* Cuando todavía no hay ningún proyecto */
-.proy-vacio-total {
+/* Estado vacío para personas nuevas (proyectos, notas...): ícono, mensaje y un botón para empezar */
+.vacio-total {
 	max-width: 460px;
 	margin: 24px auto;
 	padding: 32px 24px;
@@ -1408,15 +1408,15 @@ td {
 	border-radius: 12px;
 }
 
-	.proy-vacio-total h2 {
+	.vacio-total h2 {
 		font-size: 1.3rem;
 	}
 
-	.proy-vacio-total p {
+	.vacio-total p {
 		color: var(--c-muted);
 	}
 
-.proy-vacio-icono {
+.vacio-icono {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -1428,7 +1428,7 @@ td {
 	color: var(--c-link, var(--c-primary));
 }
 
-	.proy-vacio-icono .ico {
+	.vacio-icono .ico {
 		width: 24px;
 		height: 24px;
 	}

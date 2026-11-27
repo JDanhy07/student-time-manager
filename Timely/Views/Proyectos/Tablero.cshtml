@@ -79,8 +79,8 @@
 
 @if (!proyectos.Any())
 {
-    <section class="proy-vacio-total">
-        <span class="proy-vacio-icono"><partial name="_Icono" model='"folder"' /></span>
+    <section class="vacio-total">
+        <span class="vacio-icono"><partial name="_Icono" model='"folder"' /></span>
         <h2>Todavía no tienes proyectos</h2>
         <p>Crea el primero para ver aquí cuánto tiempo te queda en cada uno.</p>
         <a asp-action="Create" class="btn btn-primary">Crear mi primer proyecto</a>
