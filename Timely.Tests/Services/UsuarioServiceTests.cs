@@ -209,5 +209,86 @@ namespace Timely.Tests.Services
 
             Assert.Equal(ana.Id, perfil.Id);
         }
+
+        // ---------- Buscar (filtro, orden y paginación en la base de datos) ----------
+
+        [Fact]
+        public void Buscar_PorTexto_EncuentraPorUsuarioOCorreo()
+        {
+            _db.CrearUsuario("ana");
+            _db.CrearUsuario("beto");
+            _db.CrearUsuario("carla");
+
+            var porNombre = _servicio.Buscar("BET", null, "nombre", 1, 10);
+            var porCorreo = _servicio.Buscar("carla@test", null, "nombre", 1, 10);
+
+            Assert.Equal("beto", Assert.Single(porNombre.Items).Usuario);
+            Assert.Equal("carla", Assert.Single(porCorreo.Items).Usuario);
+        }
+
+        [Fact]
+        public void Buscar_LosComodinesDelTextoSeBuscanTalCual()
+        {
+            _db.CrearUsuario("ana_01");
+            _db.CrearUsuario("anaX01");
+
+            var resultado = _servicio.Buscar("ana_", null, "nombre", 1, 10);
+
+            Assert.Equal("ana_01", Assert.Single(resultado.Items).Usuario);
+        }
+
+        [Fact]
+        public void Buscar_FiltraPorRol()
+        {
+            _db.CrearUsuario("ana", "Administrador");
+            _db.CrearUsuario("beto");
+            _db.CrearUsuario("carla");
+
+            var admins = _servicio.Buscar(null, "Administrador", "nombre", 1, 10);
+            var estudiantes = _servicio.Buscar(null, "Estudiante", "nombre", 1, 10);
+
+            Assert.Equal(1, admins.Total);
+            Assert.Equal(2, estudiantes.Total);
+        }
+
+        [Fact]
+        public void Buscar_PaginaYAjustaLaPaginaFueraDeRango()
+        {
+            for (int i = 1; i <= 25; i++) _db.CrearUsuario($"user{i:00}");
+
+            var primera = _servicio.Buscar(null, null, "nombre", 1, 10);
+            var ultima = _servicio.Buscar(null, null, "nombre", 99, 10);
+
+            Assert.Equal(25, primera.Total);
+            Assert.Equal(3, primera.TotalPaginas);
+            Assert.Equal(10, primera.Items.Count);
+            Assert.Equal(3, ultima.Pagina);
+            Assert.Equal(5, ultima.Items.Count);
+        }
+
+        [Fact]
+        public void Buscar_OrdenaPorMasRecientes()
+        {
+            var primero = _db.CrearUsuario("ana");
+            var segundo = _db.CrearUsuario("beto");
+
+            var resultado = _servicio.Buscar(null, null, "recientes", 1, 10);
+
+            Assert.Equal(segundo.Id, resultado.Items[0].Id);
+            Assert.Equal(primero.Id, resultado.Items[1].Id);
+        }
+
+        [Fact]
+        public void ContarPorRol_AgrupaPorRol()
+        {
+            _db.CrearUsuario("ana", "Administrador");
+            _db.CrearUsuario("beto");
+            _db.CrearUsuario("carla");
+
+            var conteos = _servicio.ContarPorRol();
+
+            Assert.Equal(1, conteos["Administrador"]);
+            Assert.Equal(2, conteos["Estudiante"]);
+        }
     }
 }

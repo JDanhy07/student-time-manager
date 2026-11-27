@@ -7,6 +7,10 @@ namespace Timely.Services.Interfaces
     {
         void AgregarUsuario(Usuarios usuario);
         List<Usuarios> ObtenerTodos();
+
+        // Lista de administración: el filtro, el orden y la paginación se resuelven en la base de datos
+        PaginaUsuarios Buscar(string? texto, string? rol, string? orden, int pagina, int tamanoPagina);
+        Dictionary<string, int> ContarPorRol();
         Usuarios BuscarPorId(int id);
         void ActualizarUsuario(Usuarios usuario);
         void EliminarUsuario(Usuarios usuario);

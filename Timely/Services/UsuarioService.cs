@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Timely.Data;
 using Timely.Models;
 using Timely.Services.Interfaces;
@@ -42,6 +43,69 @@ namespace Timely.Services
         public List<Usuarios> ObtenerTodos()
         {
             return _context.Usuarios.ToList();
+        }
+
+        public PaginaUsuarios Buscar(string? texto, string? rol, string? orden, int pagina, int tamanoPagina)
+        {
+            if (tamanoPagina < 1) tamanoPagina = 1;
+
+            IQueryable<Usuarios> consulta = _context.Usuarios.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(texto))
+            {
+                // LIKE con los comodines del texto escapados, para que "%" o "_" se busquen tal cual
+                var patron = "%" + EscaparLike(texto.Trim()) + "%";
+                consulta = consulta.Where(u =>
+                    EF.Functions.Like(u.Usuario, patron, "\\") ||
+                    EF.Functions.Like(u.Correo, patron, "\\"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(rol))
+            {
+                consulta = consulta.Where(u => u.Rol == rol);
+            }
+
+            // El Id como segundo criterio mantiene estable el orden entre páginas
+            consulta = orden switch
+            {
+                "recientes" => consulta.OrderByDescending(u => u.Id),
+                "antiguos" => consulta.OrderBy(u => u.Id),
+                _ => consulta.OrderBy(u => u.Usuario).ThenBy(u => u.Id)
+            };
+
+            var total = consulta.Count();
+            var totalPaginas = Math.Max(1, (int)Math.Ceiling(total / (double)tamanoPagina));
+            pagina = Math.Min(Math.Max(1, pagina), totalPaginas);
+
+            var items = consulta
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(tamanoPagina)
+                .ToList();
+
+            return new PaginaUsuarios
+            {
+                Items = items,
+                Total = total,
+                Pagina = pagina,
+                TotalPaginas = totalPaginas
+            };
+        }
+
+        public Dictionary<string, int> ContarPorRol()
+        {
+            return _context.Usuarios
+                .GroupBy(u => u.Rol)
+                .Select(g => new { Rol = g.Key, Cantidad = g.Count() })
+                .ToDictionary(x => x.Rol, x => x.Cantidad);
+        }
+
+        private static string EscaparLike(string texto)
+        {
+            return texto
+                .Replace("\\", "\\\\")
+                .Replace("%", "\\%")
+                .Replace("_", "\\_")
+                .Replace("[", "\\[");
         }
 
         public Usuarios BuscarPorId(int id)

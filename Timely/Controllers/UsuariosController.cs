@@ -78,10 +78,31 @@ namespace Timely.Controllers
         }
 
         [Authorize(Roles = "Administrador")]
-        public ActionResult Lista()
+        public ActionResult Lista(string? q, string? rol, string? orden, int pagina = 1)
         {
-            var model = _usuarioService.ObtenerTodos();
-            return View(model);
+            // Solo se aceptan los roles y órdenes conocidos; cualquier otro valor se ignora
+            rol = rol is "Administrador" or "Estudiante" ? rol : null;
+            orden = orden is "recientes" or "antiguos" ? orden : "nombre";
+
+            // El filtro, el orden y la paginación los hace la base de datos (ver UsuarioService.Buscar)
+            var resultado = _usuarioService.Buscar(q, rol, orden, pagina, ListaUsuariosViewModel.TamanoPagina);
+            var conteos = _usuarioService.ContarPorRol();
+
+            var vm = new ListaUsuariosViewModel
+            {
+                Items = resultado.Items,
+                Busqueda = q,
+                Rol = rol,
+                Orden = orden,
+                Pagina = resultado.Pagina,
+                TotalPaginas = resultado.TotalPaginas,
+                TotalFiltrado = resultado.Total,
+                TotalAdministradores = conteos.GetValueOrDefault("Administrador"),
+                TotalEstudiantes = conteos.GetValueOrDefault("Estudiante"),
+                Total = conteos.Values.Sum()
+            };
+
+            return View(vm);
         }
 
 

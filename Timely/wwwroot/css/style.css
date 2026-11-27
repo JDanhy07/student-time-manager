@@ -1456,38 +1456,305 @@ html[data-texto="grande"] {
 	}
 
 /* =====================================================================
+   USUARIOS (lista para administradores: buscador, filtros, filas y paginación)
+   Usa solo variables, así que el modo oscuro funciona solo.
+   ===================================================================== */
+.usr-cabecera {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+	.usr-cabecera .page-title {
+		margin: 0;
+	}
+
+.usr-resumen {
+	margin: 2px 0 0;
+	color: var(--c-muted);
+	font-size: .88rem;
+}
+
+.usr-filtros {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+	.usr-filtros .form-select {
+		width: auto;
+		min-width: 160px;
+	}
+
+.usr-buscar {
+	flex: 1 1 240px;
+}
+
+	.usr-buscar input[type="text"] {
+		margin: 0;
+	}
+
+.usr-limpiar {
+	font-size: .88rem;
+}
+
+.usr-conteo {
+	margin: 0 0 8px;
+	color: var(--c-muted);
+	font-size: .82rem;
+}
+
+.usr-lista {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.usr-fila {
+	display: grid;
+	grid-template-columns: 38px minmax(0, 1fr) 120px 110px auto;
+	align-items: center;
+	gap: 14px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--c-border);
+}
+
+	.usr-fila:last-child {
+		border-bottom: 0;
+	}
+
+	.usr-fila:hover {
+		background: var(--c-primary-soft);
+	}
+
+.usr-avatar {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--c-primary-soft);
+	color: var(--c-primary);
+	font-family: var(--font-display);
+	font-size: 1.05rem;
+}
+
+.usr-datos {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.usr-nombre {
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.usr-correo {
+	color: var(--c-muted);
+	font-size: .84rem;
+	text-decoration: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+	.usr-correo:hover {
+		text-decoration: underline;
+	}
+
+.usr-rol {
+	justify-self: start;
+	font-size: .75rem;
+	font-weight: 500;
+	padding: 2px 10px;
+	border-radius: 999px;
+}
+
+.usr-rol-admin {
+	background: var(--estado-proceso-bg);
+	color: var(--estado-proceso-fg);
+}
+
+.usr-rol-estudiante {
+	background: var(--estado-inactivo-bg);
+	color: var(--estado-inactivo-fg);
+}
+
+.usr-fecha {
+	color: var(--c-muted);
+	font-size: .84rem;
+}
+
+.usr-acciones {
+	display: flex;
+	gap: 8px;
+}
+
+.usr-vacio {
+	text-align: center;
+	padding: 36px 16px;
+	color: var(--c-muted);
+	border: 1px dashed var(--c-border-strong);
+	border-radius: 12px;
+}
+
+.usr-paginas {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	margin-top: 18px;
+	font-size: .9rem;
+}
+
+	.usr-paginas a,
+	.usr-paginas .usr-pag-actual {
+		min-width: 34px;
+		padding: 5px 10px;
+		text-align: center;
+		border-radius: 8px;
+		text-decoration: none;
+	}
+
+	.usr-paginas a {
+		border: 1px solid var(--c-border);
+		background: var(--c-surface);
+	}
+
+		.usr-paginas a:hover {
+			background: var(--c-primary-soft);
+		}
+
+	.usr-paginas .usr-pag-actual {
+		background: var(--c-primary);
+		color: #fff;
+		font-weight: 500;
+	}
+
+.usr-puntos {
+	color: var(--c-muted);
+}
+
+/* En pantallas angostas cada fila se apila */
+@media (max-width: 760px) {
+	.usr-fila {
+		grid-template-columns: 38px minmax(0, 1fr) auto;
+		row-gap: 8px;
+	}
+
+	.usr-rol {
+		grid-column: 2;
+	}
+
+	.usr-fecha {
+		grid-column: 3;
+		grid-row: 2;
+	}
+
+	.usr-acciones {
+		grid-column: 1 / -1;
+	}
+}
+
+/* =====================================================================
    MODO OSCURO
    Misma identidad (marino + ocre), con las superficies oscurecidas.
    Se activa con <html data-tema="dark"> (lo pone _TemaScript / site.js).
    ===================================================================== */
 :root[data-tema="dark"] {
 	color-scheme: dark;
-	--c-bg: #121722;
-	--c-surface: #1a2130;
-	--c-text: #e9e7e0;
-	--c-muted: #9ca5b8;
-	--c-border: #2c3547;
-	--c-border-strong: #3b465c;
-	--c-primary: #3f6aa3; /* fondos de botones: el texto blanco conserva buen contraste */
-	--c-primary-dark: #335a8f;
-	--c-primary-soft: #232d42;
-	--c-accent: #d19a45;
-	--c-accent-text: #e0b062;
-	--c-nav: #161c2a;
-	--c-nav-soft: #232d42;
-	--c-link: #8fb4e6; /* el marino sobre fondo oscuro no se lee: los textos usan este azul claro */
-	--c-link-hover: #b5cdf0;
-	--estado-proceso-bg: #232d42;
-	--estado-proceso-fg: #9fc0ee;
-	--estado-vencido-bg: #3a2321;
-	--estado-vencido-fg: #f0a39b;
-	--estado-hecho-bg: #1f3328;
-	--estado-hecho-fg: #8fcaa3;
-	--estado-inactivo-bg: #262b36;
-	--estado-inactivo-fg: #a3abbd;
-	--shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
-	--shadow-md: 0 4px 14px rgba(0, 0, 0, .45);
+	/* Superficies: grafito con un leve matiz pizarra (menos azul marino, más separación entre capas) */
+	--c-bg: #1b1e26;
+	--c-surface: #252a35;
+	--c-surface-2: #2d3341; /* tarjetas dentro de otras superficies */
+	--c-text: #eceae4;
+	--c-muted: #a6adbb;
+	--c-border: #3a4150;
+	--c-border-strong: #4d5568;
+	/* Marca: azul más vivo para botones, que ya no se confunde con el fondo */
+	--c-primary: #4f86d6;
+	--c-primary-dark: #3f72bd;
+	--c-primary-soft: #2b3445;
+	--c-accent: #e0a94f;
+	--c-accent-text: #ecc078;
+	--c-nav: #20242e;
+	--c-nav-soft: #2b3445;
+	--c-link: #9cc2f4;
+	--c-link-hover: #c2dafa;
+	--estado-proceso-bg: #26354d;
+	--estado-proceso-fg: #a9cbf6;
+	--estado-vencido-bg: #432a2b;
+	--estado-vencido-fg: #f4aaa2;
+	--estado-hecho-bg: #243a2f;
+	--estado-hecho-fg: #95d3a9;
+	--estado-inactivo-bg: #2f3440;
+	--estado-inactivo-fg: #b0b7c6;
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+	--shadow-md: 0 6px 18px rgba(0, 0, 0, .4);
 }
+
+	/* Capas: las tarjetas internas se distinguen de la columna que las contiene */
+	:root[data-tema="dark"] .proy-card {
+		background: var(--c-surface-2);
+	}
+
+	:root[data-tema="dark"] .proy-col {
+		background: var(--c-surface);
+		border-left: 1px solid var(--c-border);
+		border-right: 1px solid var(--c-border);
+		border-bottom: 1px solid var(--c-border);
+	}
+
+	:root[data-tema="dark"] .app-bar {
+		background: var(--c-nav);
+		border-bottom-color: var(--c-border);
+	}
+
+	/* Botón principal con degradado sutil y texto blanco */
+	:root[data-tema="dark"] .btn-primary {
+		background-color: var(--c-primary);
+		border-color: var(--c-primary);
+		color: #fff;
+	}
+
+	/* Botones de acción: contorno visible y relleno suave al pasar el cursor */
+	:root[data-tema="dark"] .btn-edit:hover {
+		color: var(--c-link-hover);
+	}
+
+	:root[data-tema="dark"] .btn-delete:hover {
+		color: #ffc4be;
+	}
+
+	:root[data-tema="dark"] .btn:focus,
+	:root[data-tema="dark"] .btn:active:focus {
+		box-shadow: 0 0 0 3px rgba(79, 134, 214, .35);
+	}
+
+	:root[data-tema="dark"] .dash-tag-hoy {
+		background: var(--c-accent);
+		color: #1b1e26;
+	}
+
+	:root[data-tema="dark"] .dash-card,
+	:root[data-tema="dark"] .modal-content,
+	:root[data-tema="dark"] .dropdown-menu {
+		border-color: var(--c-border);
+	}
 
 	/* Textos que usaban el marino como color */
 	:root[data-tema="dark"] .btn-outline-primary,
@@ -1521,7 +1788,7 @@ html[data-texto="grande"] {
 	:root[data-tema="dark"] .form-select,
 	:root[data-tema="dark"] input[type="text"],
 	:root[data-tema="dark"] textarea {
-		background-color: #1f2738;
+		background-color: var(--c-surface-2);
 		color: var(--c-text);
 		border-color: var(--c-border-strong);
 	}
