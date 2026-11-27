@@ -1671,6 +1671,49 @@ html[data-texto="grande"] {
 }
 
 /* =====================================================================
+   CALENDARIO (retoques sobre FullCalendar 5)
+   Todo sale de variables, así que el modo oscuro funciona solo.
+   ===================================================================== */
+.fc {
+	--fc-border-color: var(--c-border);
+	--fc-today-bg-color: rgba(183, 121, 31, .10);
+	--fc-button-bg-color: var(--c-primary);
+	--fc-button-border-color: var(--c-primary);
+	--fc-button-hover-bg-color: var(--c-primary-dark);
+	--fc-button-hover-border-color: var(--c-primary-dark);
+	--fc-button-active-bg-color: var(--c-primary-dark);
+	--fc-button-active-border-color: var(--c-primary-dark);
+}
+
+	/* Días de la semana y números del mes: sin subrayado ni color de enlace (al pasar el cursor sí se subrayan) */
+	.fc a.fc-col-header-cell-cushion,
+	.fc a.fc-daygrid-day-number {
+		text-decoration: none;
+		color: var(--c-text);
+	}
+
+	.fc a.fc-col-header-cell-cushion {
+		padding: 6px 4px;
+		font-size: .82rem;
+		font-weight: 500;
+		text-transform: capitalize;
+		color: var(--c-muted);
+	}
+
+	.fc .fc-col-header-cell {
+		background: var(--c-nav-soft);
+	}
+
+	.fc a.fc-daygrid-day-number {
+		font-size: .88rem;
+	}
+
+	.fc .fc-day-today a.fc-daygrid-day-number {
+		font-weight: 500;
+		color: var(--c-accent-text);
+	}
+
+/* =====================================================================
    MODO OSCURO
    Misma identidad (marino + ocre), con las superficies oscurecidas.
    Se activa con <html data-tema="dark"> (lo pone _TemaScript / site.js).
