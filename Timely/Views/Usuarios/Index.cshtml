@@ -1,169 +1,137 @@
-﻿@model IEnumerable<Timely.Models.Usuarios>
+﻿@using System.Globalization
+@model Timely.Models.HogarDashboardViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Inicio";
+
+    var es = new CultureInfo("es-CR");
+    var hoy = DateTime.Today;
+
+    string Etiqueta(DateTime d) =>
+        d.Date == hoy ? "Hoy" : d.Date == hoy.AddDays(1) ? "Mañana" : "";
+
+    string Horario(Timely.Models.EventoResumen ev)
+    {
+        bool todoDia = ev.Inicio.TimeOfDay == TimeSpan.Zero
+                       && ev.Fin.HasValue && ev.Fin.Value.TimeOfDay >= new TimeSpan(23, 59, 0);
+        if (todoDia) return "Todo el día";
+        var texto = ev.Inicio.ToString("HH:mm");
+        if (ev.Fin.HasValue) texto += " – " + ev.Fin.Value.ToString("HH:mm");
+        return texto;
+    }
+
+    var saludo = Model.Saludo + (string.IsNullOrWhiteSpace(Model.NombreUsuario) ? "" : ", " + Model.NombreUsuario);
+
+    var resumen = Model.EventosSemana == 0
+        ? "No tienes eventos en los próximos 7 días."
+        : "Tienes " + Model.EventosSemana + (Model.EventosSemana == 1 ? " evento" : " eventos") + " en los próximos 7 días.";
 }
 
-<style>
-    /* ========== ESTILOS EXCLUSIVOS PARA EL LOGIN ========== */
-    /* Reseteamos solo lo necesario para esta página */
-    body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: linear-gradient(135deg, #1565C0, #64B5F6) !important;
-        font-family: 'Segoe UI', system-ui, sans-serif !important;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+<div class="dash">
 
-    /* Contenedor principal (por si hay algún wrapper) */
-    .login-container {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 1rem;
-        box-sizing: border-box;
-    }
+    <!-- Saludo -->
+    <section class="dash-hero">
+        <div class="dash-fecha">@Model.FechaHoy</div>
+        <h1>@saludo</h1>
+        <p class="dash-resumen">@resumen</p>
 
-    /* Tarjeta blanca: ancho fluido con tope */
-    .login-card {
-        background: white;
-        padding: 2rem 1.5rem;
-        border-radius: 1.5rem;
-        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        max-width: 420px;
-        transition: all 0.3s ease;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
-    /* Ajuste para pantallas muy pequeñas */
-    @@media (max-width: 480px) {
-        .login-card
-
-    {
-        padding: 1.5rem 1rem;
-        border-radius: 1rem;
-    }
-
-    }
-
-    /* Campos de formulario */
-    .login-card .form-group {
-        margin-bottom: 1.2rem;
-        text-align: left;
-    }
-
-    .login-card label {
-        font-weight: 600;
-        margin-bottom: 0.3rem;
-        display: inline-block;
-        color: #333;
-    }
-
-    .login-card .form-control {
-        border-radius: 40px;
-        padding: 0.75rem 1rem;
-        border: 1px solid #ccc;
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 1rem;
-        transition: border 0.2s;
-    }
-
-        .login-card .form-control:focus {
-            border-color: #1565C0;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.2);
-        }
-
-    /* Botón de inicio de sesión */
-    .login-card .btn-primary {
-        background-color: #1565C0;
-        border: none;
-        border-radius: 40px;
-        padding: 0.75rem;
-        font-size: 1.1rem;
-        font-weight: bold;
-        width: 100%;
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s, transform 0.1s;
-    }
-
-        .login-card .btn-primary:hover {
-            background-color: #0D47A1;
-            transform: scale(1.01);
-        }
-
-    /* Enlace de registro */
-    .login-card .text-link {
-        color: #1565C0;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.2s;
-    }
-
-        .login-card .text-link:hover {
-            text-decoration: underline;
-            color: #0D47A1;
-        }
-
-    /* Mensajes de error */
-    .login-card .alert-danger {
-        background-color: #ffe6e6;
-        color: #b00020;
-        border-radius: 30px;
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-        text-align: left;
-    }
-
-    /* Ocultar el menú principal en esta página */
-    #menu {
-        display: none !important;
-    }
-
-    /* Evitar que el footer fijo se superponga */
-    #footer {
-        display: none !important;
-    }
-</style>
-
-<div class="login-container">
-    <div class="login-card">
-        <h3 class="mb-3">Iniciar sesión</h3>
-
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger">
-                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        <div class="dash-stats">
+            <div class="dash-stat">
+                <strong>@Model.EventosHoy</strong>
+                <span>@(Model.EventosHoy == 1 ? "evento hoy" : "eventos hoy")</span>
             </div>
-        }
-
-        <form asp-action="Login">
-            <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" name="usuario" class="form-control" required />
+            <div class="dash-stat">
+                <strong>@Model.EventosSemana</strong>
+                <span>próximos 7 días</span>
             </div>
-
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="Contrasena" class="form-control" required />
-            </div>
-
-            <div class="text-center mt-4">
-                <input type="submit" value="Iniciar sesión" class="btn-primary" />
-            </div>
-        </form>
-
-        <div class="text-center mt-3">
-            <a asp-action="Create" class="text-link">Regístrese Aquí</a>
         </div>
+    </section>
+
+    <!-- Accesos rápidos -->
+    <section class="dash-actions">
+        <a class="dash-action" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">
+            <partial name="_Icono" model='"calendar"' /> Nuevo evento
+        </a>
+        <a class="dash-action" asp-controller="Notas" asp-action="Create">
+            <partial name="_Icono" model='"nota"' /> Nueva nota
+        </a>
+        <a class="dash-action" asp-controller="Proyectos" asp-action="Create">
+            <partial name="_Icono" model='"folder"' /> Nuevo proyecto
+        </a>
+    </section>
+
+    <div class="dash-grid">
+
+        <!-- Próximos eventos -->
+        <section class="dash-card">
+            <div class="dash-card-header">
+                <h2>Próximos eventos</h2>
+                <a class="dash-link" asp-controller="Calendarios" asp-action="Index">Ver calendario <partial name="_Icono" model='"arrow"' /></a>
+            </div>
+
+            @if (Model.ProximosEventos.Any())
+            {
+                foreach (var ev in Model.ProximosEventos)
+                {
+                    var etiqueta = Etiqueta(ev.Inicio);
+                    <div class="dash-evento">
+                        <div class="dash-fecha-badge">
+                            <strong>@ev.Inicio.Day</strong>
+                            <span>@ev.Inicio.ToString("MMM", es).TrimEnd('.')</span>
+                        </div>
+                        <div class="dash-evento-info">
+                            <div class="dash-evento-titulo">@ev.Titulo</div>
+                            <div class="dash-evento-hora"><partial name="_Icono" model='"clock"' /> @Horario(ev)</div>
+                        </div>
+                        @if (etiqueta == "Hoy")
+                        {
+                            <span class="dash-tag dash-tag-hoy">Hoy</span>
+                        }
+                        else if (etiqueta == "Mañana")
+                        {
+                            <span class="dash-tag dash-tag-manana">Mañana</span>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="dash-vacio">
+                    <partial name="_Icono" model='"calendar"' />
+                    <div>No tienes eventos próximos.</div>
+                    <a class="btn btn-primary mt-3" asp-controller="Calendarios" asp-action="Index" asp-route-nuevo="1">Crear un evento</a>
+                </div>
+            }
+        </section>
+
+        <!-- Columna derecha -->
+        <div class="dash-col">
+            <section class="dash-card">
+                <div class="dash-card-header">
+                    <h2>Notas</h2>
+                </div>
+                <p>Guarda apuntes e ideas importantes organizados por carpeta.</p>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Notas" asp-action="MisNotas">Ir a mis notas</a>
+            </section>
+
+            <section class="dash-card">
+                <div class="dash-card-header">
+                    <h2>Proyectos</h2>
+                </div>
+                <p>Da seguimiento a tus entregas y fechas límite.</p>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Proyectos" asp-action="Tablero">Ir a mis proyectos</a>
+            </section>
+        </div>
+
     </div>
+
+    <!-- Consejo -->
+    <section class="dash-card dash-tip">
+        <img src="~/img/importancia.jpg" alt="Importancia de gestionar el tiempo" />
+        <div>
+            <h2>¿Por qué gestionar tu tiempo?</h2>
+            <p>Organizar tus horas reduce el estrés y te da claridad para avanzar en tus metas académicas y personales. Cada minuto cuenta: empieza hoy planificando tu semana.</p>
+        </div>
+    </section>
+
 </div>

@@ -1,10 +1,11 @@
-﻿@model Timely.Models.Usuarios
+﻿@using System.Globalization
+@model Timely.Models.Usuarios
 
 @{
     ViewData["Title"] = "Editar Usuarios";
 }
 
-<h3>Edicion de Usuarios</h3>
+<h1>Edicion de Usuarios</h1>
 
 <h4>Usuarios</h4>
 <hr />
@@ -23,38 +24,39 @@
                 <span asp-validation-for="Usuario" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Perfil" class="control-label"></label>
-                <input asp-for="Perfil" class="form-control" />
-                <span asp-validation-for="Perfil" class="text-danger"></span>
+                <label asp-for="Rol" class="control-label"></label>
+                <input asp-for="Rol" class="form-control" />
+                <span asp-validation-for="Rol" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Correo" class="control-label"></label>
-                <input asp-for="Correo" class="form-control" />
+                <label asp-for="Correo" class="control-label">Correo electrónico</label>
+                <input asp-for="Correo" class="form-control" type="email" placeholder="ejemplo@gmail.com" autocomplete="email" />
                 <span asp-validation-for="Correo" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" />
+                <input asp-for="Fecha" type="date" class="form-control" />
                 <span asp-validation-for="Fecha" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Contrasena" class="control-label"></label>
-                <input asp-for="Contrasena" class="form-control" />
+                <input asp-for="Contrasena" type="password" class="form-control"
+                       autocomplete="new-password" placeholder="Dejar en blanco para no cambiarla" />
                 <span asp-validation-for="Contrasena" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Confirmacion" class="control-label"></label>
-                <input asp-for="Confirmacion" class="form-control" />
+                <input asp-for="Confirmacion" type="password" class="form-control"
+                       autocomplete="new-password" placeholder="Repite la nueva contraseña" />
                 <span asp-validation-for="Confirmacion" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 <input type="submit" value="Guardar Cambios" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Lista">Regresar a Lista de Usuarios</a>
+<div class="mt-3">
+     <a class="btn btn-outline-primary" asp-action="Lista">Regresar a Lista de Usuarios</a>
 </div>
-

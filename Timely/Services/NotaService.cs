@@ -19,9 +19,10 @@ namespace Timely.Services
             _context.SaveChanges();
         }
 
-        public List<Nota> ObtenerTodas()
+        public List<Nota> ObtenerPorUsuario(int usuarioId)
         {
-            return _context.Notas.ToList();
+            return _context.Notas.Where(n => n.UsuarioId == usuarioId)
+                                 .ToList();
         }
 
         public Nota BuscarPorId(int id)
@@ -33,6 +34,7 @@ namespace Timely.Services
         public void ActualizarNota(Nota nota)
         {
             var existente = BuscarPorId(nota.Id);
+            existente.Titulo = nota.Titulo;
             existente.Contenido = nota.Contenido;
             existente.Carpeta = nota.Carpeta;
             _context.SaveChanges();

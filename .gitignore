@@ -1,0 +1,37 @@
+## Archivos compilados
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio (cache y configuración local)
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Bases de datos locales (EF Core / SQL Server Express)
+*.mdf
+*.ldf
+*.sdf
+*.db
+*.db-shm
+*.db-wal
+
+## Paquetes NuGet (se restauran al compilar)
+*.nuget.props
+*.nuget.targets
+packages/
+
+## Configuración que cambia por desarrollador
+appsettings.Development.json
+
+## Resultados de pruebas y cobertura
+TestResults/
+*.trx
+coverage*/
+
+## Archivos generados por el sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

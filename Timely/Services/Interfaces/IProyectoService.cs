@@ -5,11 +5,11 @@ namespace Timely.Services.Interfaces
     public interface IProyectoService
     {
         void AgregarProyecto(Proyectos proyecto);
-        List<Proyectos> ObtenerTodos();
+        List<Proyectos> ObtenerPorUsuario(int usuarioId);
         Proyectos BuscarPorId(int id);
         void ActualizarProyecto(Proyectos proyecto);
         void EliminarProyecto(Proyectos proyecto);
-        Task<List<Proyectos>> ObtenerVencidosAsync();
+        Task<List<Proyectos>> ObtenerVencidosAsync(int usuarioId);
         string ObtenerClaseEstado(DateTime fechaInicio, DateTime fechaVencimiento, string estado);
     }
 }

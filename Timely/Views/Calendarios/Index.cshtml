@@ -4,21 +4,63 @@
     ViewData["Title"] = "Calendario de Eventos";
 }
 
-<h2>Calendario de Eventos</h2>
-<button id="btnAgregar" class="btn btn-success">Agregar Evento</button>
+<h1>Calendario de Eventos</h1>
+<p class="mb-4">
+    <button id="btnAgregar" class="btn btn-primary">Agregar Evento</button>
+</p>
 <div id="calendar"></div>
 
-<!-- Modal para Agregar Evento -->
-<div id="modalAgregar" class="modal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modal de DETALLE (solo lectura) -->
+<div id="modalDetalle" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Agregar Evento</h5>
+                <h5 class="modal-title" id="detalleTitulo"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <label>Id:</label>
-                <input type="number" id="id" class="form-control" />
+                <div class="detalle-fila">
+                    <span class="detalle-icono">📅</span>
+                    <div>
+                        <div class="detalle-etiqueta">Inicio</div>
+                        <div id="detalleInicio"></div>
+                    </div>
+                </div>
+                <div class="detalle-fila">
+                    <span class="detalle-icono">🕓</span>
+                    <div>
+                        <div class="detalle-etiqueta">Fin</div>
+                        <div id="detalleFin"></div>
+                    </div>
+                </div>
+                <div class="detalle-fila">
+                    <span class="detalle-icono">📝</span>
+                    <div>
+                        <div class="detalle-etiqueta">Descripción</div>
+                        <div id="detalleDescripcion" class="detalle-descripcion"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnEliminarDetalle" class="btn btn-outline-danger me-auto">Eliminar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnEditarDetalle" class="btn btn-primary">Editar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de FORMULARIO (crear / editar) -->
+<div id="modalEvento" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Agregar Evento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id" value="0">
+
                 <label>Título:</label>
                 <input type="text" id="titulo" class="form-control">
                 <label>Fecha Inicio:</label>
@@ -29,13 +71,15 @@
                 <textarea id="descripcion" class="form-control"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" id="guardarEvento" class="btn btn-primary">Guardar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="guardarEvento" class="btn btn-primary">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
+@* Token antiforgery que los $.ajax de crear, editar y eliminar envían en la cabecera *@
+@Html.AntiForgeryToken()
 <!-- FullCalendar & Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
@@ -43,6 +87,66 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
+
+        var eventoSeleccionado = null; // evento abierto en el detalle
+
+        //Token antiforgery que se envia en la cabecera de cada POST (crear, editar, eliminar)
+        var tokenAntiforgery = $('input[name="__RequestVerificationToken"]').val();
+
+        // ---------- Helpers ----------
+        // Date -> "yyyy-MM-ddTHH:mm" (formato de datetime-local, en hora local)
+        function aInputLocal(fecha) {
+            if (!fecha) return "";
+            var pad = function (n) { return String(n).padStart(2, "0"); };
+            return fecha.getFullYear() + "-" + pad(fecha.getMonth() + 1) + "-" + pad(fecha.getDate()) +
+                   "T" + pad(fecha.getHours()) + ":" + pad(fecha.getMinutes());
+        }
+
+        // Date -> "miércoles, 4 de noviembre de 2026, 00:00"
+        function formatoLegible(fecha) {
+            if (!fecha) return "No especificado";
+            return fecha.toLocaleString("es", {
+                weekday: "long", day: "numeric", month: "long", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+            });
+        }
+
+        function mensajeError(xhr) {
+            return xhr.responseJSON && xhr.responseJSON.message
+                ? xhr.responseJSON.message
+                : "Hubo un error al conectar con el servidor.";
+        }
+
+        function abrirModalDetalle(evento) {
+            eventoSeleccionado = evento;
+            $("#detalleTitulo").text(evento.title || "Sin título");
+            $("#detalleInicio").text(formatoLegible(evento.start));
+            $("#detalleFin").text(formatoLegible(evento.end));
+            $("#detalleDescripcion").text(evento.extendedProps.description || "Sin descripción");
+            $("#modalDetalle").modal("show");
+        }
+
+        function abrirModalCrear(inicio, fin) {
+            $("#modalTitulo").text("Agregar Evento");
+            $("#id").val(0);
+            $("#titulo").val("");
+            $("#descripcion").val("");
+            $("#fechaInicio").val(inicio || "");
+            $("#fechaFinal").val(fin || "");
+            $("#modalEvento").modal("show");
+        }
+
+        function abrirModalEditar(evento) {
+            $("#modalTitulo").text("Editar Evento");
+            $("#id").val(evento.id);
+            $("#titulo").val(evento.title);
+            $("#descripcion").val(evento.extendedProps.description || "");
+            $("#fechaInicio").val(aInputLocal(evento.start));
+            $("#fechaFinal").val(aInputLocal(evento.end || evento.start));
+            $("#modalEvento").modal("show");
+        }
+
+        // ---------- Calendario ----------
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -52,89 +156,162 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            eventDidMount: function (info){
-                info.el.classList.add("evento-punto");
-            },
             events: '/Calendarios/ObtenerEventos',
+
+            // Eventos como "chips" con su título visible (sin hora pegada)
+            eventDisplay: 'block',
+            displayEventTime: false,
+            eventColor: 'mediumpurple',
+            dayMaxEvents: 3,            // "+ más" si hay demasiados en un día
+
+            eventDidMount: function (info) {
+                info.el.title = info.event.title;   // tooltip al pasar el mouse
+                info.el.style.cursor = "pointer";
+            },
+
+            // Click en evento -> DETALLE (solo lectura)
             eventClick: function (info) {
-            const evento = info.event;
+                abrirModalDetalle(info.event);
+            },
 
-            let detalle = 
-             "📌 " + (evento.title || "Sin título") + "\n" +
-             "📅 Inicio: " + evento.start.toLocaleString() + "\n" +
-             "🕓 Fin: " + (evento.end ? evento.end.toLocaleString() : "No especificado") + "\n" +
-              "📝 Descripción: " + (evento.extendedProps.description || "Sin descripción");
-
-             alert(detalle);
-             },
-
+            // Click en día vacío -> crear
             dateClick: function (info) {
-                $("#fechaInicio").val(info.dateStr + "T00:00");
-                $("#fechaFinal").val(info.dateStr + "T23:59");
-                $("#modalAgregar").modal("show");
+                abrirModalCrear(info.dateStr + "T00:00", info.dateStr + "T23:59");
             }
-
-
         });
         calendar.render();
 
         $("#btnAgregar").click(function () {
-            $("#modalAgregar").modal("show");
+            abrirModalCrear();
         });
 
+        // ---------- Detalle -> Editar ----------
+        $("#btnEditarDetalle").click(function () {
+            var evento = eventoSeleccionado;
+            if (!evento) return;
+            // Espera a que el detalle se cierre para evitar problemas con el backdrop
+            $("#modalDetalle").one("hidden.bs.modal", function () {
+                abrirModalEditar(evento);
+            }).modal("hide");
+        });
+
+        // ---------- Detalle -> Eliminar ----------
+        $("#btnEliminarDetalle").click(function () {
+            if (!eventoSeleccionado) return;
+            var id = parseInt(eventoSeleccionado.id) || 0;
+            if (id === 0) return;
+
+            if (!confirm("¿Seguro que deseas eliminar \"" + eventoSeleccionado.title + "\"? Esta acción no se puede deshacer.")) {
+                return;
+            }
+
+            $.ajax({
+                url: "/Calendarios/EliminarEvento",
+                type: "POST",
+                headers: { "RequestVerificationToken": tokenAntiforgery },
+                contentType: "application/json",
+                processData: false,
+                data: JSON.stringify(id),
+                success: function (response) {
+                    if (response.success) {
+                        calendar.refetchEvents();
+                        $("#modalDetalle").modal("hide");
+                    } else {
+                        alert("Error al eliminar: " + response.message);
+                    }
+                },
+                error: function (xhr) { alert(mensajeError(xhr)); }
+            });
+        });
+
+        // ---------- Guardar (Create o Edit según el Id) ----------
         $("#guardarEvento").click(function () {
+            var id = parseInt($("#id").val()) || 0;
+
             var evento = {
-                Id: $("#id").val(),
-                Titulo: $("#titulo").val(),
+                Id: id,
+                Titulo: $("#titulo").val().trim(),
                 FechaInicio: $("#fechaInicio").val(),
                 FechaFinal: $("#fechaFinal").val(),
                 Descripcion: $("#descripcion").val()
             };
 
+            if (!evento.Titulo || !evento.FechaInicio || !evento.FechaFinal) {
+                alert("El título y las fechas son obligatorios.");
+                return;
+            }
+            if (evento.FechaFinal < evento.FechaInicio) {
+                alert("La fecha final no puede ser anterior a la fecha de inicio.");
+                return;
+            }
+
+            var url = id === 0 ? "/Calendarios/CrearEvento" : "/Calendarios/EditarEvento";
+
             $.ajax({
-                url: "/Calendarios/CrearEvento",
+                url: url,
                 type: "POST",
-                contentType: "application/json",  // Indica que se envían datos en JSON
-                processData: false,  // Evita que el jQuery procese los datos automáticamente
+                headers: { "RequestVerificationToken": tokenAntiforgery },
+                contentType: "application/json",
+                processData: false,
                 data: JSON.stringify(evento),
                 success: function (response) {
                     if (response.success) {
                         calendar.refetchEvents();
-                        calendar.render();
-                        $("#modalAgregar").modal("hide");
+                        $("#modalEvento").modal("hide");
+                    } else {
+                        alert("Error al guardar: " + response.message);
                     }
-                   else {
-                       alert("Error al guardar: " + response.message);
-                   }
                 },
-                error: function() {
-                    alert("Hubo un error al conectar con el servidor.");
-                }
+                error: function (xhr) { alert(mensajeError(xhr)); }
             });
         });
     });
 </script>
 
 <style>
-    .evento-punto {
-        background: none !important;
-        border: none !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        height: 1em !important;
-        width: 1em !important;
-        position: relative;
+    /* Botones de los modales en fila (anula el ancho completo del estilo global) */
+    #modalDetalle .modal-footer,
+    #modalEvento .modal-footer {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        gap: .5rem;
     }
 
-    .evento-punto::before {
-            content: "●";
-            color: mediumpurple; 
-            font-size: 1.2rem;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            line-height: 1;
+        #modalDetalle .modal-footer .btn,
+        #modalEvento .modal-footer .btn {
+            width: auto !important;
+            display: inline-block;
+            margin: 0;
+        }
+
+    /* Vista de detalle */
+    .detalle-fila {
+        display: flex;
+        gap: .75rem;
+        align-items: flex-start;
+        margin-bottom: 1rem;
     }
 
+    .detalle-icono {
+        font-size: 1.25rem;
+        line-height: 1.4;
+    }
+
+    .detalle-etiqueta {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #6c757d;
+    }
+
+    .detalle-descripcion {
+        white-space: pre-wrap;
+    }
+
+    /* Chips de eventos */
+    .fc-daygrid-event {
+        border-radius: 6px;
+        padding: 1px 6px;
+    }
 </style>

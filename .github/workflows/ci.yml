@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]        # cualquier rama
+  pull_request:
+    branches: [ main ]        # y los PR hacia main
+  workflow_dispatch:          # también se puede lanzar a mano desde la pestaña Actions
+
+# Si llega un push nuevo a la misma rama, cancela la ejecución anterior que sigue en curso
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-y-pruebas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restaurar dependencias
+        run: dotnet restore Timely/Timely.sln
+
+      - name: Compilar
+        run: dotnet build Timely/Timely.sln --no-restore --configuration Release
+
+      - name: Ejecutar pruebas
+        run: dotnet test Timely/Timely.sln --no-build --configuration Release --verbosity normal

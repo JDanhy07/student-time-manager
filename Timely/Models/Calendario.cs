@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Timely.Models
 {
@@ -49,5 +50,11 @@ namespace Timely.Models
 
 		// Descripción adicional del evento
 		public string Descripcion { get => descripcion; set => descripcion = value; }
+
+		[Required]
+		public int UsuarioId { get; set; }
+
+		[ForeignKey("UsuarioId")]
+		public virtual Usuarios Usuario { get; set; }
 	}
 }

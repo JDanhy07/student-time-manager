@@ -5,17 +5,11 @@
 }
 
 
-<h2>¿Estas seguro de eliminar el contenido? No es reversible.</h2>
+<h1>¿Estás seguro de eliminar el contenido? No es reversible.</h1>
 <div>
     <h4>Nota</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Contenido)
         </dt>
@@ -23,9 +17,9 @@
             @Html.DisplayFor(model => model.Contenido)
         </dd>
     </dl>
-    
-    <form asp-action="Delete">
-        <input type="submit" value="Eliminar nota" class="btn btn-danger" /> |
-        <a asp-action="MisNotas">Regresar a mis notas</a>
+
+    <form asp-action="Delete" class="d-flex gap-2">
+       <input type="submit" value="Eliminar nota" class="btn btn-danger" />
+        <a asp-action="MisNotas" class="btn btn-outline-primary">Regresar a mis notas</a>
     </form>
 </div>

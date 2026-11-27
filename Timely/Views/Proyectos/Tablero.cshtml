@@ -1,124 +1,254 @@
-﻿@model IEnumerable<Timely.Models.Proyectos>
+﻿@using System.Globalization
+@model IEnumerable<Timely.Models.Proyectos>
 
 @{
     ViewData["Title"] = "Tablero";
+
+    var es = new CultureInfo("es-CR");
+    var ahora = DateTime.Now;
+    var proyectos = Model.ToList();
+
+    // Las cuatro columnas del tablero, en el orden en que un proyecto avanza en el tiempo
+    var columnas = new[]
+    {
+        new { Clave = "inactivo", Titulo = "Próximos",   Sub = "Aún no empiezan" },
+        new { Clave = "proceso",  Titulo = "En proceso", Sub = "Lo que llevas ahora" },
+        new { Clave = "vencido",  Titulo = "Vencidos",   Sub = "Necesitan atención" },
+        new { Clave = "hecho",    Titulo = "Hechos",     Sub = "Ya completados" }
+    };
 }
-
-<style>
-    .estado span {
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-
-    .estado-vencido {
-        background-color: #ffcccc; /* Rojo suave */
-        color: #a00000;
-        border: 1px solid #a00000;
-    }
-
-    .estado-proceso {
-        background-color: #fff3cd; /* Amarillo suave */
-        color: #856404;
-        border: 1px solid #856404;
-    }
-
-    .estado-inactivo {
-        background-color: #cce5ff; /* Azul pastel */
-        color: #004085;
-        border: 1px solid #004085;
-    }
-
-    .estado-hecho {
-        background-color: #c3e6cb; /* Verde suave */
-        color: #155724;
-        border: 1px solid #155724;
-    }
-</style>
-
-<h3>Mis proyectos</h3>
-
-<p>
-    <a asp-action="Create">Agregar nuevo proyecto</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Estado)</th>
-            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
-            <th>@Html.DisplayNameFor(model => model.Fecha_de_inicio)</th>
-            <th>@Html.DisplayNameFor(model => model.Vence)</th>
-            <th>Completar</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td class="estado">
-                    <span id="estado-@item.Id" class="@GetEstadoClase(item)">
-                        @GetEstadoTexto(item)
-                    </span>
-                </td>
-                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
-                <td>@Html.DisplayFor(modelItem => item.Fecha_de_inicio)</td>
-                <td>@Html.DisplayFor(modelItem => item.Vence)</td>
-                <td>
-                    <input type="checkbox" class="check-proyecto"
-                           data-id="@item.Id"
-                           data-estado-original="@GetEstadoTexto(item)"
-                           onchange="actualizarEstado(this)"
-                    @(item.Estado == "Hecho" ? "checked" : "")>
-                </td>
-                <td>
-                    @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
-                    @Html.ActionLink("Eliminar", "Delete", new { id = item.Id })
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
 
 @functions {
-    string GetEstadoTexto(Timely.Models.Proyectos item)
+    // Misma regla que usaba la tabla: Hecho > Vencido > Próximo > En proceso
+    static string ClaveDe(Timely.Models.Proyectos p, DateTime ahora)
     {
-        if (item.Estado == "Hecho") return "Hecho";
-        if (item.Vence < DateTime.Now) return "Vencido";
-        if (item.Fecha_de_inicio > DateTime.Now) return "Inactivo";
-        return "En proceso";
+        if (p.Estado == "Hecho") return "hecho";
+        if (p.Vence < ahora) return "vencido";
+        if (p.Fecha_de_inicio > ahora) return "inactivo";
+        return "proceso";
     }
 
-    string GetEstadoClase(Timely.Models.Proyectos item)
+    // Qué parte del plazo (inicio -> vence) ya transcurrió, de 0 a 100
+    static int Avance(Timely.Models.Proyectos p, string clave, DateTime ahora)
     {
-        if (item.Estado == "Hecho") return "estado-hecho";
-        if (item.Vence < DateTime.Now) return "estado-vencido";
-        if (item.Fecha_de_inicio > DateTime.Now) return "estado-inactivo";
-        return "estado-proceso";
+        if (clave == "hecho" || clave == "vencido") return 100;
+        if (clave == "inactivo") return 0;
+        var total = (p.Vence - p.Fecha_de_inicio).TotalSeconds;
+        if (total <= 0) return 100;
+        var pasado = (ahora - p.Fecha_de_inicio).TotalSeconds;
+        return (int)Math.Clamp(Math.Round(pasado / total * 100), 0, 100);
     }
+
+    static string Dias(int n) => n == 1 ? "1 día" : n + " días";
+
+    // Texto de cuenta regresiva, por días de calendario (más natural que contar horas)
+    static string Cuenta(Timely.Models.Proyectos p, string clave, DateTime ahora)
+    {
+        switch (clave)
+        {
+            case "hecho":
+                return "Completado";
+            case "inactivo":
+                {
+                    var d = (p.Fecha_de_inicio.Date - ahora.Date).Days;
+                    return d <= 0 ? "Empieza hoy" : d == 1 ? "Empieza mañana" : "Empieza en " + Dias(d);
+                }
+            case "vencido":
+                {
+                    var d = (ahora.Date - p.Vence.Date).Days;
+                    return d <= 0 ? "Venció hoy" : d == 1 ? "Venció ayer" : "Venció hace " + Dias(d);
+                }
+            default:
+                {
+                    var d = (p.Vence.Date - ahora.Date).Days;
+                    return d <= 0 ? "Vence hoy" : d == 1 ? "Vence mañana" : "Vence en " + Dias(d);
+                }
+        }
+    }
+
+    // Un proyecto en proceso que vence en 2 días o menos se resalta con el ocre de la marca
+    static bool EsUrgente(Timely.Models.Proyectos p, string clave, DateTime ahora) =>
+        clave == "proceso" && (p.Vence.Date - ahora.Date).Days <= 2;
 }
 
-<script>
-        function actualizarEstado(checkbox) {
-        let id = checkbox.getAttribute("data-id");
-        let completado = checkbox.checked;
+<h1>Mis proyectos</h1>
 
-        fetch('/Proyectos/ActualizarEstado', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: parseInt(id), completado: completado })
-        })
-        .then(response => response.json())
-        .then(data => {
-            let estadoElemento = document.getElementById(`estado-${id}`);
-            estadoElemento.textContent = data.nuevoEstado;
-            estadoElemento.className = data.nuevaClase;
-            checkbox.setAttribute("data-estado-original", data.nuevoEstado);
-        })
-        .catch(error => {
-            alert("Hubo un error al actualizar el estado.");
-            console.error(error);
-        });
-    }
-</script>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Agregar nuevo proyecto</a>
+</p>
 
+@if (!proyectos.Any())
+{
+    <section class="vacio-total">
+        <span class="vacio-icono"><partial name="_Icono" model='"folder"' /></span>
+        <h2>Todavía no tienes proyectos</h2>
+        <p>Crea el primero para ver aquí cuánto tiempo te queda en cada uno.</p>
+        <a asp-action="Create" class="btn btn-primary">Crear mi primer proyecto</a>
+    </section>
+}
+else
+{
+    <div class="proy-tablero">
+        @foreach (var col in columnas)
+        {
+            var deColumna = proyectos
+            .Where(p => ClaveDe(p, ahora) == col.Clave)
+            .OrderBy(p => p.Vence)
+            .ToList();
+            if (col.Clave == "hecho") { deColumna.Reverse(); }   // los últimos en vencer primero
+
+            <section class="proy-col" data-columna="@col.Clave" aria-labelledby="col-@col.Clave">
+                <header class="proy-col-head">
+                    <div>
+                        <h2 id="col-@col.Clave" class="proy-col-titulo">@col.Titulo</h2>
+                        <p class="proy-col-sub">@col.Sub</p>
+                    </div>
+                    <span class="proy-col-conteo">@deColumna.Count</span>
+                </header>
+
+                <div class="proy-lista">
+                    @foreach (var p in deColumna)
+                    {
+                        var avance = Avance(p, col.Clave, ahora);
+                        var urgente = EsUrgente(p, col.Clave, ahora);
+
+                        <article class="proy-card @(urgente ? "proy-urgente" : "")" data-id="@p.Id" data-clave="@col.Clave"
+                                 data-inicio="@p.Fecha_de_inicio.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)"
+                                 data-vence="@p.Vence.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)"
+                                 title="Inicio: @p.Fecha_de_inicio.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture) · Vence: @p.Vence.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture)">
+                            <div class="proy-card-top">
+                                <h3 class="proy-nombre">@p.Nombre</h3>
+                                <input type="checkbox" class="proy-check" @(col.Clave == "hecho" ? "checked" : null)
+                                       aria-label="Marcar @p.Nombre como completado" title="Marcar como completado" />
+                            </div>
+
+                            <p class="proy-plazo">
+                                <partial name="_Icono" model='"calendar"' />
+                                <span>@(p.Fecha_de_inicio.ToString("d MMM", es)) – @(p.Vence.ToString("d MMM yyyy", es))</span>
+                            </p>
+
+                            <div class="proy-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@avance" aria-label="Tiempo transcurrido">
+                                <span style="width:@(avance)%"></span>
+                            </div>
+                            <p class="proy-cuenta">@Cuenta(p, col.Clave, ahora)</p>
+
+                            <div class="proy-acciones">
+                                @Html.ActionLink("Editar", "Edit", new { id = p.Id }, new { @class = "btn btn-outline-primary btn-sm" })
+                                @Html.ActionLink("Eliminar", "Delete", new { id = p.Id }, new { @class = "btn btn-outline-danger btn-sm" })
+                            </div>
+                        </article>
+                    }
+                    <p class="proy-vacio" hidden="@(deColumna.Any() ? "hidden" : null)">Nada por aquí</p>
+                </div>
+            </section>
+        }
+    </div>
+}
+
+@* Token antiforgery que el fetch de abajo envía en la cabecera *@
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        (function () {
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+
+            function diasEntre(desde, hasta) {
+                var a = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate());
+                var b = new Date(hasta.getFullYear(), hasta.getMonth(), hasta.getDate());
+                return Math.round((b - a) / 86400000);
+            }
+            function dias(n) { return n === 1 ? '1 día' : n + ' días'; }
+
+            // Misma lógica que el servidor, para recolocar la tarjeta sin recargar la página
+            function claveDe(inicio, vence, completado, ahora) {
+                if (completado) return 'hecho';
+                if (vence < ahora) return 'vencido';
+                if (inicio > ahora) return 'inactivo';
+                return 'proceso';
+            }
+            function cuenta(clave, inicio, vence, ahora) {
+                var d;
+                if (clave === 'hecho') return 'Completado';
+                if (clave === 'inactivo') {
+                    d = diasEntre(ahora, inicio);
+                    return d <= 0 ? 'Empieza hoy' : d === 1 ? 'Empieza mañana' : 'Empieza en ' + dias(d);
+                }
+                if (clave === 'vencido') {
+                    d = diasEntre(vence, ahora);
+                    return d <= 0 ? 'Venció hoy' : d === 1 ? 'Venció ayer' : 'Venció hace ' + dias(d);
+                }
+                d = diasEntre(ahora, vence);
+                return d <= 0 ? 'Vence hoy' : d === 1 ? 'Vence mañana' : 'Vence en ' + dias(d);
+            }
+            function avance(clave, inicio, vence, ahora) {
+                if (clave === 'hecho' || clave === 'vencido') return 100;
+                if (clave === 'inactivo') return 0;
+                var total = vence - inicio;
+                if (total <= 0) return 100;
+                return Math.max(0, Math.min(100, Math.round((ahora - inicio) / total * 100)));
+            }
+
+            function refrescarColumnas() {
+                document.querySelectorAll('.proy-col').forEach(function (col) {
+                    var n = col.querySelectorAll('.proy-card').length;
+                    col.querySelector('.proy-col-conteo').textContent = n;
+                    col.querySelector('.proy-vacio').hidden = n > 0;
+                });
+            }
+
+            function recolocar(card, completado) {
+                var ahora = new Date();
+                var inicio = new Date(card.getAttribute('data-inicio'));
+                var vence = new Date(card.getAttribute('data-vence'));
+                var clave = claveDe(inicio, vence, completado, ahora);
+                var pct = avance(clave, inicio, vence, ahora);
+
+                card.setAttribute('data-clave', clave);
+                card.classList.toggle('proy-urgente', clave === 'proceso' && diasEntre(ahora, vence) <= 2);
+                card.querySelector('.proy-cuenta').textContent = cuenta(clave, inicio, vence, ahora);
+
+                var barra = card.querySelector('.proy-barra');
+                barra.setAttribute('aria-valuenow', pct);
+                barra.firstElementChild.style.width = pct + '%';
+
+                document.querySelector('.proy-col[data-columna="' + clave + '"] .proy-lista')
+                    .insertBefore(card, document.querySelector('.proy-col[data-columna="' + clave + '"] .proy-vacio'));
+                refrescarColumnas();
+            }
+
+            document.addEventListener('change', function (e) {
+                var check = e.target.closest('.proy-check');
+                if (!check) return;
+
+                var card = check.closest('.proy-card');
+                var completado = check.checked;
+                card.classList.add('proy-cargando');
+                check.disabled = true;
+
+                fetch('/Proyectos/ActualizarEstado', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token.value
+                    },
+                    body: JSON.stringify({ id: parseInt(card.getAttribute('data-id'), 10), completado: completado })
+                })
+                .then(function (respuesta) {
+                    if (!respuesta.ok) throw new Error('HTTP ' + respuesta.status);
+                    return respuesta.json();
+                })
+                .then(function () { recolocar(card, completado); })
+                .catch(function (error) {
+                    check.checked = !completado;   // se deshace el cambio visual
+                    alert('Hubo un error al actualizar el estado.');
+                    console.error(error);
+                })
+                .finally(function () {
+                    card.classList.remove('proy-cargando');
+                    check.disabled = false;
+                });
+            });
+        })();
+    </script>
+}

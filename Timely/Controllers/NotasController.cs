@@ -1,21 +1,34 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Timely.Models;
+using Timely.Services;
 using Timely.Services.Interfaces;
 
 namespace Timely.Controllers
 {
+    [Authorize]
     public class NotasController : Controller
     {
         private readonly INotaService _notaService;
+        private readonly IUsuarioService _usuarioService;
 
-        public NotasController(INotaService notaService)
+        public NotasController(INotaService notaService, IUsuarioService usuarioService)
         {
             _notaService = notaService;
+            _usuarioService = usuarioService;
+        }
+
+        private int ObtenerUsuarioActualId()
+        {
+            var usuario = _usuarioService.ObtenerPerfil(User);
+            return usuario?.Id ?? 0;
         }
 
         public ActionResult MisNotas()
         {
-            var model = _notaService.ObtenerTodas();
+            int usuarioId = ObtenerUsuarioActualId();
+            if (usuarioId == 0) return RedirectToAction("Login", "Usuarios");
+            var model = _notaService.ObtenerPorUsuario(usuarioId);
             return View(model);
         }
 
@@ -28,24 +41,39 @@ namespace Timely.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Nota nota)
         {
+            nota.UsuarioId = ObtenerUsuarioActualId();
+
             try
             {
-                if (!ModelState.IsValid)
-                    return View(nota);
+                // 2. Le dices al validador que ignore que estos campos no vinieron del HTML
+                ModelState.Remove("Usuario");
+                ModelState.Remove("UsuarioId");
 
-                _notaService.AgregarNota(nota);
-                return RedirectToAction(nameof(MisNotas));
+                if (ModelState.IsValid)
+                {
+                    _notaService.AgregarNota(nota);
+                    return RedirectToAction(nameof(MisNotas));
+                }
+
+                //Si el modelo no es válido, se vuelve a mostrar la vista con los errores de validación
+                return View(nota);
+
             }
-            catch
+            catch 
             {
-                ModelState.AddModelError("", "La nota que deseas añadir ya existe. Intenta con otra.");
+                ModelState.AddModelError("", "No se pudo guardar la nota. Intenta nuevamente.");
                 return View(nota);
             }
         }
 
+        [HttpGet]
         public ActionResult Edit(int id)
         {
             var nota = _notaService.BuscarPorId(id);
+            if (nota.UsuarioId != ObtenerUsuarioActualId())
+            {
+                return Unauthorized();
+            }
             return View(nota);
         }
 
@@ -53,6 +81,13 @@ namespace Timely.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, Nota nota)
         {
+            nota.UsuarioId = ObtenerUsuarioActualId();
+            var notaOriginal = _notaService.BuscarPorId(nota.Id);
+            if (notaOriginal.UsuarioId != nota.UsuarioId)
+            {
+                return Unauthorized();
+            }
+
             try
             {
                 if (!ModelState.IsValid)
@@ -71,6 +106,10 @@ namespace Timely.Controllers
         public ActionResult Delete(int id)
         {
             var nota = _notaService.BuscarPorId(id);
+            if (nota.UsuarioId != ObtenerUsuarioActualId())
+            {
+                return Unauthorized();
+            }
             return View(nota); // Muestra la nota a confirmar antes de eliminar
         }
 
@@ -81,6 +120,10 @@ namespace Timely.Controllers
             try
             {
                 var nota = _notaService.BuscarPorId(id);
+                if (nota.UsuarioId != ObtenerUsuarioActualId())
+                {
+                    return Unauthorized();
+                }
                 _notaService.EliminarNota(nota);
                 return RedirectToAction(nameof(MisNotas));
             }

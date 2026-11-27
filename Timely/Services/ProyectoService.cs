@@ -18,11 +18,14 @@ namespace Timely.Services
         {
             _context.Proyectos.Add(proyecto);
             _context.SaveChanges();
+            Console.WriteLine($"Proyecto agregado: {proyecto.Nombre}, ID: {proyecto.Id}"); 
         }
 
-        public List<Proyectos> ObtenerTodos()
+        public List<Proyectos> ObtenerPorUsuario(int usuarioId)
         {
-            return _context.Proyectos.ToList();
+            return _context.Proyectos
+                .Where(p => p.UsuarioId == usuarioId)
+                .ToList();
         }
 
         public Proyectos BuscarPorId(int id)
@@ -38,6 +41,7 @@ namespace Timely.Services
             existente.Fecha_de_inicio = proyecto.Fecha_de_inicio;
             existente.Vence = proyecto.Vence;
             existente.Estado = proyecto.Estado;
+            existente.Completado = proyecto.Completado;
             _context.SaveChanges();
         }
 
@@ -48,10 +52,14 @@ namespace Timely.Services
         }
 
         // EF Core: ToListAsync() viene de Microsoft.EntityFrameworkCore, no de System.Data.Entity
-        public async Task<List<Proyectos>> ObtenerVencidosAsync()
+        public async Task<List<Proyectos>> ObtenerVencidosAsync(int usuarioId)
         {
+            // Se calcula por fechas (igual que el tablero) porque el Estado guardado solo se actualiza al escribir y puede decir "En proceso" aunque ya venció
+
+            DateTime ahora = DateTime.Now;
+
             return await _context.Proyectos
-                .Where(p => p.Estado == "Vencido")
+                .Where(p => p.UsuarioId == usuarioId && !p.Completado && p.Vence < ahora)
                 .ToListAsync();
         }
 
