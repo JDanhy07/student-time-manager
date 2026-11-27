@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <partial name="_TemaScript" />
 </head>
 <body>
     <header class="app-bar">
@@ -53,6 +54,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="MiPerfil">Mi perfil</a></li>
+                            <li><button type="button" class="dropdown-item" data-alternar-tema><span data-tema-etiqueta>Modo oscuro</span></button></li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
                                 <form asp-controller="Usuarios" asp-action="Logout" method="post">

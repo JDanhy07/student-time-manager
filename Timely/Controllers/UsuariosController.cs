@@ -13,8 +13,8 @@ namespace Timely.Controllers
 {
     public class UsuariosController : Controller
     {
-        private  IUsuarioService _usuarioService;
-        private  ILogger<UsuariosController> _logger;
+        private IUsuarioService _usuarioService;
+        private ILogger<UsuariosController> _logger;
         private readonly ICalendarioService _calendarioService;
         private static bool TryFecha(string texto, out DateTime fecha) => DateTime.TryParse(texto, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha);
 
@@ -131,29 +131,7 @@ namespace Timely.Controllers
 
                 if (usuarioEncontrado != null)
                 {
-                    // Crea los claims para establecer la sesión y rol
-                    var rol = usuarioEncontrado.Rol;
-                    var claims = new List<Claim>()
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, usuarioEncontrado.Id.ToString()), 
-                        new Claim(ClaimTypes.Name, usuarioEncontrado.Usuario),
-                        new Claim(ClaimTypes.Role, rol)
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties
-                    {
-                        AllowRefresh = true,
-                        IsPersistent = false, // Cambiar a true si quieres que la sesión persista después de cerrar el navegador
-                    };
-
-                    // Inicia la sesión del usuario
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
-
-                    HttpContext.Session.SetString("Usuario", usuarioEncontrado.Usuario);
+                    await IniciarSesionAsync(usuarioEncontrado);
 
                     return RedirectToAction("Index"); // Redirige según el flujo deseado
                 }
@@ -171,13 +149,39 @@ namespace Timely.Controllers
             return View(); // Vista por defecto si algo sale mal
         }
 
+        // Crea los claims (id, nombre, rol) y emite la cookie de sesión.
+        // También se usa al cambiar el nombre de usuario, para que la barra superior muestre el nombre nuevo.
+        private async Task IniciarSesionAsync(Usuarios usuario)
+        {
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Name, usuario.Usuario),
+                new Claim(ClaimTypes.Role, usuario.Rol)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                AllowRefresh = true,
+                IsPersistent = false, // Cambiar a true si quieres que la sesión persista después de cerrar el navegador
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            HttpContext.Session.SetString("Usuario", usuario.Usuario);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Logout()
         {
             //Elimina la cookie de autenticación y cierra la sesión del usuario
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-              HttpContext.Session.Clear(); // Limpia la sesión
+            HttpContext.Session.Clear(); // Limpia la sesión
 
             return RedirectToAction("Login");
         }
@@ -208,24 +212,25 @@ namespace Timely.Controllers
                 ModelState.Remove("Contrasena");
                 ModelState.Remove("Confirmacion");
                 model.Contrasena = null;
-            } else if (model.Contrasena != model.Confirmacion)
+            }
+            else if (model.Contrasena != model.Confirmacion)
             {
                 ModelState.AddModelError("Confirmacion", "Las contraseñas no coinciden");
             }
 
-                try
-                {
-                    if (!ModelState.IsValid)
-                        return View(model);
-
-                    _usuarioService.ActualizarUsuario(model);
-                    return RedirectToAction(nameof(Lista));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
+            try
+            {
+                if (!ModelState.IsValid)
                     return View(model);
-                }
+
+                _usuarioService.ActualizarUsuario(model);
+                return RedirectToAction(nameof(Lista));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
         }
 
         [Authorize(Roles = "Administrador")]
@@ -286,8 +291,8 @@ namespace Timely.Controllers
             }
 
             return View(user);
-        } 
-        
+        }
+
 
         [Authorize]
         public ActionResult MiPerfil()
@@ -296,7 +301,86 @@ namespace Timely.Controllers
             if (usuario == null)
                 return NotFound();
 
-            return View(usuario);
+            return View(ArmarPerfil(usuario));
+        }
+
+        // El <input type="date"> solo entiende yyyy-MM-dd; los valores guardados con otro formato se normalizan
+        private static string NormalizarFecha(string texto) =>
+            TryFecha(texto, out var fecha) ? fecha.ToString("yyyy-MM-dd") : texto;
+
+        private static MiPerfilViewModel ArmarPerfil(Usuarios usuario) => new MiPerfilViewModel
+        {
+            Id = usuario.Id,
+            Usuario = usuario.Usuario,
+            Rol = usuario.Rol,
+            Correo = usuario.Correo,
+            Fecha = usuario.Fecha,
+            Edicion = new EditarPerfilViewModel
+            {
+                Usuario = usuario.Usuario,
+                Correo = usuario.Correo,
+                Fecha = NormalizarFecha(usuario.Fecha)
+            }
+        };
+
+        // La persona solo puede editar SU perfil: el id sale de la sesión, nunca del formulario
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ActualizarPerfil([Bind(Prefix = "Edicion")] EditarPerfilViewModel edicion)
+        {
+            var usuario = _usuarioService.ObtenerPerfil(User);
+            if (usuario == null)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _usuarioService.ActualizarPerfil(usuario.Id, edicion.Usuario, edicion.Correo, edicion.Fecha);
+
+                    // Se vuelve a emitir la cookie para que el nombre nuevo aparezca en la barra superior
+                    await IniciarSesionAsync(_usuarioService.BuscarPorId(usuario.Id));
+
+                    TempData["PerfilMensaje"] = "Tus datos se actualizaron correctamente.";
+                    return RedirectToAction(nameof(MiPerfil));
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // Usuario o correo ya en uso
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+
+            var vm = ArmarPerfil(usuario);
+            vm.Edicion = edicion;
+            vm.EditandoDatos = true;
+            return View("MiPerfil", vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult CambiarContrasena([Bind(Prefix = "Contrasena")] CambiarContrasenaViewModel contrasena)
+        {
+            var usuario = _usuarioService.ObtenerPerfil(User);
+            if (usuario == null)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                if (_usuarioService.CambiarContrasena(usuario.Id, contrasena.ContrasenaActual, contrasena.ContrasenaNueva))
+                {
+                    TempData["PerfilMensaje"] = "Tu contraseña se cambió correctamente.";
+                    return RedirectToAction(nameof(MiPerfil));
+                }
+
+                ModelState.AddModelError("Contrasena.ContrasenaActual", "La contraseña actual no es correcta.");
+            }
+
+            var vm = ArmarPerfil(usuario);
+            vm.CambiandoContrasena = true;   // las contraseñas escritas no se devuelven a la vista
+            return View("MiPerfil", vm);
         }
     }
 

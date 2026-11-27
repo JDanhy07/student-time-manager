@@ -31,22 +31,20 @@
 
 :root {
 	/* Superficies y texto */
-	--c-bg: #f8f6f1;            /* marfil */
+	--c-bg: #f8f6f1; /* marfil */
 	--c-surface: #ffffff;
-	--c-text: #1b1f2a;          /* tinta */
+	--c-text: #1b1f2a; /* tinta */
 	--c-muted: #5b6070;
 	--c-border: #e3dfd6;
 	--c-border-strong: #cfcabd;
-
 	/* Marca */
-	--c-primary: #1f3a5f;       /* marino */
+	--c-primary: #1f3a5f; /* marino */
 	--c-primary-dark: #162b47;
 	--c-primary-soft: #e7ecf3;
-	--c-accent: #b7791f;        /* ocre */
+	--c-accent: #b7791f; /* ocre */
 	--c-accent-text: #8a5a12;
 	--c-nav: #ffffff;
 	--c-nav-soft: #e7ecf3;
-
 	/* Estados de proyecto (se reutilizan en tablero, inicio y calendario) */
 	--estado-proceso-bg: #e7ecf3;
 	--estado-proceso-fg: #1f3a5f;
@@ -56,10 +54,8 @@
 	--estado-hecho-fg: #3f6b4f;
 	--estado-inactivo-bg: #ecebe6;
 	--estado-inactivo-fg: #5b6070;
-
 	--font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
 	--font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
-
 	--radius: 10px;
 	--shadow-sm: 0 1px 2px rgba(27, 31, 42, .06);
 	--shadow-md: 0 4px 14px rgba(27, 31, 42, .08);
@@ -92,17 +88,28 @@ h1, h2, h3, h4, .page-title {
 	line-height: 1.25;
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.55rem; }
-h3 { font-size: 1.3rem; }
-h4 { font-size: 1.1rem; }
+h1 {
+	font-size: 2rem;
+}
+
+h2 {
+	font-size: 1.55rem;
+}
+
+h3 {
+	font-size: 1.3rem;
+}
+
+h4 {
+	font-size: 1.1rem;
+}
 
 a {
-	color: var(--c-primary);
+	color: var(--c-link, var(--c-primary));
 }
 
 	a:hover {
-		color: var(--c-primary-dark);
+		color: var(--c-link-hover, var(--c-primary-dark));
 	}
 
 .ico {
@@ -153,10 +160,10 @@ textarea {
 	font-size: .9rem;
 }
 
-	.alert ul {
-		margin: 0;
-		padding-left: 1.1rem;
-	}
+.alert ul {
+	margin: 0;
+	padding-left: 1.1rem;
+}
 
 /* ---------- Botones de Bootstrap con la paleta del sitio ---------- */
 .btn {
@@ -190,6 +197,17 @@ textarea {
 		color: #fff;
 	}
 
+.btn-outline-danger {
+	color: var(--estado-vencido-fg);
+	border-color: var(--estado-vencido-fg);
+}
+
+	.btn-outline-danger:hover {
+		background-color: var(--estado-vencido-fg);
+		border-color: var(--estado-vencido-fg);
+		color: #fff;
+	}
+
 /* ---------- Barra superior ---------- */
 .app-bar {
 	background: var(--c-nav);
@@ -200,7 +218,7 @@ textarea {
 }
 
 .app-bar-inner {
-	max-width: 1000px;   /* mismo ancho que .container para alinear el logo con el contenido */
+	max-width: 1000px; /* mismo ancho que .container para alinear el logo con el contenido */
 	margin: 0 auto;
 	padding: 0 20px;
 	min-height: 58px;
@@ -957,7 +975,7 @@ td {
 @media (max-width: 860px) {
 	.auth {
 		grid-template-columns: 1fr;
-		grid-template-rows: auto 1fr;   /* la franja de marca no se estira */
+		grid-template-rows: auto 1fr; /* la franja de marca no se estira */
 	}
 
 	.auth-main {
@@ -976,3 +994,619 @@ td {
 		display: none;
 	}
 }
+
+/* =====================================================================
+   MI PERFIL
+   ===================================================================== */
+.perfil-alerta {
+	border-radius: 8px;
+	font-size: .9rem;
+}
+
+.alert-success {
+	background: var(--estado-hecho-bg);
+	color: var(--estado-hecho-fg);
+	border: 1px solid var(--c-border);
+}
+
+.perfil-hero {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 20px;
+	margin-bottom: 16px;
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: 12px;
+	box-shadow: var(--shadow-sm);
+}
+
+.perfil-avatar {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--c-primary);
+	color: #fff;
+	font-family: var(--font-display);
+	font-size: 1.6rem;
+}
+
+.perfil-hero-texto {
+	min-width: 0;
+	flex: 1;
+}
+
+.perfil-nombre {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: 1.4rem;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.perfil-correo {
+	margin: 2px 0 0;
+	color: var(--c-muted);
+	font-size: .92rem;
+	overflow-wrap: anywhere;
+}
+
+.perfil-rol {
+	flex: none;
+	padding: 3px 12px;
+	border-radius: 999px;
+	background: var(--c-primary-soft);
+	color: var(--c-primary);
+	font-size: .8rem;
+	font-weight: 500;
+}
+
+.perfil-card {
+	margin-bottom: 16px;
+	padding: 20px;
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: 12px;
+	box-shadow: var(--shadow-sm);
+}
+
+.perfil-card-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+/* Tarjetas de una sola fila (Seguridad, Sesión): el botón queda centrado respecto al texto */
+.perfil-card-head--centrado {
+	align-items: center;
+}
+
+.perfil-card-titulo {
+	margin: 0;
+	font-size: 1.2rem;
+}
+
+.perfil-card-sub {
+	margin: 2px 0 0;
+	color: var(--c-muted);
+	font-size: .88rem;
+}
+
+.perfil-datos {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px 24px;
+	margin: 18px 0 0;
+}
+
+	.perfil-datos dt {
+		color: var(--c-muted);
+		font-size: .8rem;
+		font-weight: 500;
+	}
+
+	.perfil-datos dd {
+		margin: 2px 0 0;
+		overflow-wrap: anywhere;
+	}
+
+.perfil-form {
+	max-width: 420px;
+	margin-top: 8px;
+}
+
+.perfil-acciones {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 20px;
+}
+
+.perfil-pref {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px 24px;
+	padding-top: 16px;
+	margin-top: 16px;
+	border-top: 1px solid var(--c-border);
+}
+
+.perfil-pref-nombre {
+	margin: 0;
+	font-weight: 500;
+}
+
+.perfil-pref-desc {
+	margin: 0;
+	color: var(--c-muted);
+	font-size: .88rem;
+}
+
+/* Control segmentado: se usa para elegir tema y tamaño de texto */
+.segmentado {
+	display: inline-flex;
+	padding: 3px;
+	gap: 2px;
+	background: var(--c-primary-soft);
+	border-radius: 10px;
+}
+
+	.segmentado button {
+		border: 0;
+		background: transparent;
+		color: var(--c-text);
+		padding: 6px 14px;
+		border-radius: 8px;
+		font-size: .88rem;
+		font-weight: 500;
+	}
+
+		.segmentado button:hover {
+			background: var(--c-surface);
+		}
+
+		.segmentado button[aria-pressed="true"] {
+			background: var(--c-primary);
+			color: #fff;
+		}
+
+		.segmentado button:focus-visible {
+			outline: 2px solid var(--c-primary);
+			outline-offset: 2px;
+		}
+
+@media (max-width: 575px) {
+	.perfil-hero {
+		flex-wrap: wrap;
+	}
+
+	.perfil-datos {
+		grid-template-columns: 1fr;
+	}
+
+	.perfil-card-head {
+		flex-wrap: wrap;
+	}
+}
+
+/* =====================================================================
+   PROYECTOS (tablero por columnas)
+   Los colores salen de las variables de estado, así que el modo oscuro funciona solo.
+   ===================================================================== */
+.proy-tablero {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 16px;
+	align-items: start;
+	margin-top: 8px;
+}
+
+.proy-col {
+	--acento: var(--estado-inactivo-fg);
+	background: var(--c-primary-soft);
+	border-radius: 12px;
+	border-top: 3px solid var(--acento);
+	padding: 14px 12px 12px;
+	min-width: 0;
+}
+
+	.proy-col[data-columna="proceso"] {
+		--acento: var(--c-primary);
+	}
+
+	.proy-col[data-columna="vencido"] {
+		--acento: var(--estado-vencido-fg);
+	}
+
+	.proy-col[data-columna="hecho"] {
+		--acento: var(--estado-hecho-fg);
+	}
+
+.proy-col-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 0 4px 12px;
+}
+
+.proy-col-titulo {
+	margin: 0;
+	font-size: 1.15rem;
+}
+
+.proy-col-sub {
+	margin: 0;
+	color: var(--c-muted);
+	font-size: .78rem;
+}
+
+.proy-col-conteo {
+	flex: none;
+	min-width: 26px;
+	padding: 1px 8px;
+	text-align: center;
+	border-radius: 999px;
+	background: var(--c-surface);
+	color: var(--acento);
+	font-size: .8rem;
+	font-weight: 500;
+	border: 1px solid var(--c-border);
+}
+
+.proy-lista {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.proy-vacio {
+	margin: 0;
+	padding: 18px 8px;
+	text-align: center;
+	color: var(--c-muted);
+	font-size: .85rem;
+	border: 1px dashed var(--c-border-strong);
+	border-radius: 10px;
+}
+
+.proy-card {
+	background: var(--c-surface);
+	border: 1px solid var(--c-border);
+	border-radius: 10px;
+	padding: 12px;
+	box-shadow: var(--shadow-sm);
+	transition: box-shadow .15s ease, transform .15s ease, opacity .15s ease;
+}
+
+	.proy-card:hover {
+		box-shadow: var(--shadow-md);
+		transform: translateY(-1px);
+	}
+
+.proy-cargando {
+	opacity: .6;
+}
+
+.proy-card-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.proy-nombre {
+	margin: 0;
+	font-size: 1.05rem;
+	overflow-wrap: anywhere;
+}
+
+.proy-check {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	margin-top: 3px;
+	accent-color: var(--c-primary);
+	cursor: pointer;
+}
+
+.proy-plazo {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 8px 0 10px;
+	color: var(--c-muted);
+	font-size: .8rem;
+}
+
+	.proy-plazo .ico {
+		width: 14px;
+		height: 14px;
+	}
+
+/* Barra de tiempo transcurrido del plazo */
+.proy-barra {
+	height: 6px;
+	border-radius: 999px;
+	background: var(--c-primary-soft);
+	overflow: hidden;
+}
+
+	.proy-barra span {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: var(--c-primary);
+		transition: width .3s ease;
+	}
+
+.proy-card[data-clave="inactivo"] .proy-barra span {
+	background: var(--estado-inactivo-fg);
+}
+
+.proy-card[data-clave="vencido"] .proy-barra span {
+	background: var(--estado-vencido-fg);
+}
+
+.proy-card[data-clave="hecho"] .proy-barra span {
+	background: var(--estado-hecho-fg);
+}
+
+.proy-card.proy-urgente .proy-barra span {
+	background: var(--c-accent);
+}
+
+.proy-cuenta {
+	margin: 8px 0 10px;
+	font-size: .85rem;
+	font-weight: 500;
+}
+
+.proy-card[data-clave="vencido"] .proy-cuenta {
+	color: var(--estado-vencido-fg);
+}
+
+.proy-card[data-clave="hecho"] .proy-cuenta {
+	color: var(--estado-hecho-fg);
+}
+
+.proy-card[data-clave="inactivo"] .proy-cuenta {
+	color: var(--c-muted);
+}
+
+.proy-card.proy-urgente .proy-cuenta {
+	color: var(--c-accent-text);
+}
+
+.proy-card[data-clave="hecho"] .proy-nombre {
+	text-decoration: line-through;
+	text-decoration-color: var(--c-border-strong);
+	color: var(--c-muted);
+}
+
+.proy-acciones {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* Cuando todavía no hay ningún proyecto */
+.proy-vacio-total {
+	max-width: 460px;
+	margin: 24px auto;
+	padding: 32px 24px;
+	text-align: center;
+	background: var(--c-surface);
+	border: 1px dashed var(--c-border-strong);
+	border-radius: 12px;
+}
+
+	.proy-vacio-total h2 {
+		font-size: 1.3rem;
+	}
+
+	.proy-vacio-total p {
+		color: var(--c-muted);
+	}
+
+.proy-vacio-icono {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	margin-bottom: 8px;
+	border-radius: 50%;
+	background: var(--c-primary-soft);
+	color: var(--c-link, var(--c-primary));
+}
+
+	.proy-vacio-icono .ico {
+		width: 24px;
+		height: 24px;
+	}
+
+@media (prefers-reduced-motion: reduce) {
+	.proy-card,
+	.proy-barra span {
+		transition: none;
+	}
+
+		.proy-card:hover {
+			transform: none;
+		}
+}
+
+/* =====================================================================
+   TEXTO GRANDE (preferencia de Mi Perfil)
+   ===================================================================== */
+html[data-texto="grande"] {
+	font-size: 18px;
+}
+
+	html[data-texto="grande"] body {
+		font-size: 17px;
+	}
+
+/* =====================================================================
+   MODO OSCURO
+   Misma identidad (marino + ocre), con las superficies oscurecidas.
+   Se activa con <html data-tema="dark"> (lo pone _TemaScript / site.js).
+   ===================================================================== */
+:root[data-tema="dark"] {
+	color-scheme: dark;
+	--c-bg: #121722;
+	--c-surface: #1a2130;
+	--c-text: #e9e7e0;
+	--c-muted: #9ca5b8;
+	--c-border: #2c3547;
+	--c-border-strong: #3b465c;
+	--c-primary: #3f6aa3; /* fondos de botones: el texto blanco conserva buen contraste */
+	--c-primary-dark: #335a8f;
+	--c-primary-soft: #232d42;
+	--c-accent: #d19a45;
+	--c-accent-text: #e0b062;
+	--c-nav: #161c2a;
+	--c-nav-soft: #232d42;
+	--c-link: #8fb4e6; /* el marino sobre fondo oscuro no se lee: los textos usan este azul claro */
+	--c-link-hover: #b5cdf0;
+	--estado-proceso-bg: #232d42;
+	--estado-proceso-fg: #9fc0ee;
+	--estado-vencido-bg: #3a2321;
+	--estado-vencido-fg: #f0a39b;
+	--estado-hecho-bg: #1f3328;
+	--estado-hecho-fg: #8fcaa3;
+	--estado-inactivo-bg: #262b36;
+	--estado-inactivo-fg: #a3abbd;
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+	--shadow-md: 0 4px 14px rgba(0, 0, 0, .45);
+}
+
+	/* Textos que usaban el marino como color */
+	:root[data-tema="dark"] .btn-outline-primary,
+	:root[data-tema="dark"] .avatar,
+	:root[data-tema="dark"] .perfil-rol,
+	:root[data-tema="dark"] .back-link,
+	:root[data-tema="dark"] .folder-title,
+	:root[data-tema="dark"] .btn-edit,
+	:root[data-tema="dark"] .dash-link,
+	:root[data-tema="dark"] .dash-tag-manana,
+	:root[data-tema="dark"] .dash-action .ico {
+		color: var(--c-link);
+	}
+
+	:root[data-tema="dark"] .btn-outline-primary {
+		border-color: var(--c-link);
+	}
+
+		:root[data-tema="dark"] .btn-outline-primary:hover {
+			background-color: var(--c-primary);
+			border-color: var(--c-primary);
+			color: #fff;
+		}
+
+	:root[data-tema="dark"] .btn-outline-danger:hover {
+		color: #1b1f2a;
+	}
+
+	/* Componentes de Bootstrap 5.1 (no trae modo oscuro propio) */
+	:root[data-tema="dark"] .form-control,
+	:root[data-tema="dark"] .form-select,
+	:root[data-tema="dark"] input[type="text"],
+	:root[data-tema="dark"] textarea {
+		background-color: #1f2738;
+		color: var(--c-text);
+		border-color: var(--c-border-strong);
+	}
+
+		:root[data-tema="dark"] .form-control::placeholder {
+			color: var(--c-muted);
+		}
+
+	:root[data-tema="dark"] .dropdown-menu {
+		background-color: var(--c-surface);
+		color: var(--c-text);
+	}
+
+	:root[data-tema="dark"] .dropdown-item {
+		color: var(--c-text);
+	}
+
+		:root[data-tema="dark"] .dropdown-item:hover,
+		:root[data-tema="dark"] .dropdown-item:focus {
+			background-color: var(--c-primary-soft);
+			color: var(--c-text);
+		}
+
+	:root[data-tema="dark"] .dropdown-divider {
+		border-top-color: var(--c-border);
+	}
+
+	:root[data-tema="dark"] .modal-content {
+		background-color: var(--c-surface);
+		color: var(--c-text);
+		border-color: var(--c-border);
+	}
+
+	:root[data-tema="dark"] .modal-header,
+	:root[data-tema="dark"] .modal-footer {
+		border-color: var(--c-border);
+	}
+
+	:root[data-tema="dark"] .btn-close {
+		filter: invert(1) grayscale(100%) brightness(200%);
+	}
+
+	:root[data-tema="dark"] .table {
+		color: var(--c-text);
+	}
+
+	:root[data-tema="dark"] .text-muted,
+	:root[data-tema="dark"] .blockquote-footer {
+		color: var(--c-muted) !important;
+	}
+
+	/* El tablero de proyectos define sus colores de estado en línea: se sustituyen por los oscuros */
+	:root[data-tema="dark"] .estado-vencido,
+	:root[data-tema="dark"] .estado-proceso,
+	:root[data-tema="dark"] .estado-inactivo,
+	:root[data-tema="dark"] .estado-hecho {
+		border-color: currentColor;
+	}
+
+	:root[data-tema="dark"] .estado-vencido {
+		background-color: var(--estado-vencido-bg);
+		color: var(--estado-vencido-fg);
+	}
+
+	:root[data-tema="dark"] .estado-proceso {
+		background-color: var(--estado-proceso-bg);
+		color: var(--estado-proceso-fg);
+	}
+
+	:root[data-tema="dark"] .estado-inactivo {
+		background-color: var(--estado-inactivo-bg);
+		color: var(--estado-inactivo-fg);
+	}
+
+	:root[data-tema="dark"] .estado-hecho {
+		background-color: var(--estado-hecho-bg);
+		color: var(--estado-hecho-fg);
+	}
+
+	/* FullCalendar 5 se colorea con variables */
+	:root[data-tema="dark"] .fc {
+		--fc-page-bg-color: transparent;
+		--fc-border-color: var(--c-border);
+		--fc-neutral-bg-color: var(--c-nav-soft);
+		--fc-neutral-text-color: var(--c-muted);
+		--fc-today-bg-color: rgba(209, 154, 69, .18);
+		--fc-list-event-hover-bg-color: var(--c-primary-soft);
+	}

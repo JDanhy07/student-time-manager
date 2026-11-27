@@ -1,26 +1,166 @@
-﻿@model Timely.Models.Usuarios
+﻿@using System.Globalization
+@model Timely.Models.MiPerfilViewModel
 
 @{
     ViewData["Title"] = "Mi Perfil";
+
+    var inicial = Model.Usuario.Length > 0 ? char.ToUpper(Model.Usuario[0]).ToString() : "?";
+    var mensaje = TempData["PerfilMensaje"] as string;
+
+    // La fecha se guarda como texto: si se puede leer se muestra en lenguaje natural, si no, tal cual
+    var fechaTexto = DateTime.TryParse(Model.Fecha, CultureInfo.InvariantCulture, DateTimeStyles.None, out var fecha)
+        ? fecha.ToString("d 'de' MMMM 'de' yyyy", new CultureInfo("es-CR"))
+        : Model.Fecha;
 }
 
-<h3>Mi Perfil</h3>
+<h1>Mi Perfil</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Usuario</th>
-            <th>Rol</th>
-            <th>Correo</th>
-            <th>Fecha</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>@Html.DisplayFor(model => model.Usuario)</td>
-            <td>@Html.DisplayFor(Model => Model.Rol)</td>
-            <td>@Html.DisplayFor(Model => Model.Correo)</td>
-            <td>@Html.DisplayFor(Model => Model.Fecha)</td>
-        </tr>
-    </tbody>
-</table>
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-success perfil-alerta" role="status">@mensaje</div>
+}
+
+@* ---------- Resumen ---------- *@
+<section class="perfil-hero">
+    <span class="perfil-avatar" aria-hidden="true">@inicial</span>
+    <div class="perfil-hero-texto">
+        <p class="perfil-nombre">@Model.Usuario</p>
+        <p class="perfil-correo">@Model.Correo</p>
+    </div>
+    <span class="perfil-rol">@Model.Rol</span>
+</section>
+
+@* ---------- Datos personales ---------- *@
+<section class="perfil-card">
+    <header class="perfil-card-head">
+        <div>
+            <h2 class="perfil-card-titulo">Datos personales</h2>
+            <p class="perfil-card-sub">Tu usuario, correo y fecha.</p>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-perfil-alternar="datos"
+                hidden="@(Model.EditandoDatos ? "hidden" : null)">
+            Editar
+        </button>
+    </header>
+
+    <dl class="perfil-datos" data-perfil-vista="datos" hidden="@(Model.EditandoDatos ? "hidden" : null)">
+        <div><dt>Usuario</dt><dd>@Model.Usuario</dd></div>
+        <div><dt>Correo</dt><dd>@Model.Correo</dd></div>
+        <div><dt>Fecha</dt><dd>@fechaTexto</dd></div>
+        <div><dt>Rol</dt><dd>@Model.Rol</dd></div>
+    </dl>
+
+    <form asp-action="ActualizarPerfil" method="post" class="perfil-form" data-perfil-form="datos"
+          hidden="@(Model.EditandoDatos ? null : "hidden")">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="Edicion.Usuario">Usuario</label>
+            <input asp-for="Edicion.Usuario" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Edicion.Usuario" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Edicion.Correo">Correo electrónico</label>
+            <input asp-for="Edicion.Correo" type="email" class="form-control" placeholder="ejemplo@gmail.com" autocomplete="email" />
+            <span asp-validation-for="Edicion.Correo" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Edicion.Fecha">Fecha</label>
+            <input asp-for="Edicion.Fecha" type="date" class="form-control" />
+            <span asp-validation-for="Edicion.Fecha" class="text-danger"></span>
+        </div>
+
+        <div class="perfil-acciones">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <button type="button" class="btn btn-outline-primary" data-perfil-cancelar="datos">Cancelar</button>
+        </div>
+    </form>
+</section>
+
+@* ---------- Seguridad ---------- *@
+<section class="perfil-card">
+    <header class="perfil-card-head perfil-card-head--centrado">
+        <div>
+            <h2 class="perfil-card-titulo">Seguridad</h2>
+            <p class="perfil-card-sub">Cambia tu contraseña cuando lo necesites.</p>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-perfil-alternar="contrasena"
+                hidden="@(Model.CambiandoContrasena ? "hidden" : null)">
+            Cambiar contraseña
+        </button>
+    </header>
+
+    <form asp-action="CambiarContrasena" method="post" class="perfil-form" data-perfil-form="contrasena"
+          hidden="@(Model.CambiandoContrasena ? null : "hidden")">
+        <div class="form-group">
+            <label asp-for="Contrasena.ContrasenaActual">Contraseña actual</label>
+            <input asp-for="Contrasena.ContrasenaActual" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="Contrasena.ContrasenaActual" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Contrasena.ContrasenaNueva">Nueva contraseña</label>
+            <input asp-for="Contrasena.ContrasenaNueva" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Contrasena.ContrasenaNueva" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Contrasena.Confirmacion">Confirmar nueva contraseña</label>
+            <input asp-for="Contrasena.Confirmacion" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Contrasena.Confirmacion" class="text-danger"></span>
+        </div>
+
+        <div class="perfil-acciones">
+            <button type="submit" class="btn btn-primary">Actualizar contraseña</button>
+            <button type="button" class="btn btn-outline-primary" data-perfil-cancelar="contrasena">Cancelar</button>
+        </div>
+    </form>
+</section>
+
+@* ---------- Apariencia (se guarda en este navegador, no en la base de datos) ---------- *@
+<section class="perfil-card">
+    <header class="perfil-card-head">
+        <div>
+            <h2 class="perfil-card-titulo">Apariencia</h2>
+            <p class="perfil-card-sub">Estas preferencias se guardan en este navegador.</p>
+        </div>
+    </header>
+
+    <div class="perfil-pref">
+        <div>
+            <p class="perfil-pref-nombre">Tema</p>
+            <p class="perfil-pref-desc">Claro, oscuro o el que use tu dispositivo.</p>
+        </div>
+        <div class="segmentado" role="group" aria-label="Tema">
+            <button type="button" data-tema-opcion="claro" aria-pressed="false">Claro</button>
+            <button type="button" data-tema-opcion="oscuro" aria-pressed="false">Oscuro</button>
+            <button type="button" data-tema-opcion="auto" aria-pressed="false">Automático</button>
+        </div>
+    </div>
+
+    <div class="perfil-pref">
+        <div>
+            <p class="perfil-pref-nombre">Tamaño del texto</p>
+            <p class="perfil-pref-desc">Agranda el texto si te resulta más cómodo para estudiar.</p>
+        </div>
+        <div class="segmentado" role="group" aria-label="Tamaño del texto">
+            <button type="button" data-texto-opcion="normal" aria-pressed="false">Normal</button>
+            <button type="button" data-texto-opcion="grande" aria-pressed="false">Grande</button>
+        </div>
+    </div>
+</section>
+
+@* ---------- Sesión ---------- *@
+<section class="perfil-card">
+    <header class="perfil-card-head perfil-card-head--centrado">
+        <div>
+            <h2 class="perfil-card-titulo">Sesión</h2>
+            <p class="perfil-card-sub">Cierra tu sesión en este dispositivo.</p>
+        </div>
+        <form asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
+        </form>
+    </header>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

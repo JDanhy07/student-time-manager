@@ -89,6 +89,70 @@ namespace Timely.Tests.Services
         }
 
         [Fact]
+        public void ActualizarPerfil_CambiaSoloUsuarioCorreoYFecha_NoTocaRolNiContrasena()
+        {
+            _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));
+            var ana = _db.Context.Usuarios.Single(u => u.Usuario == "ana");
+            var hashOriginal = ana.Contrasena;
+
+            _servicio.ActualizarPerfil(ana.Id, "  ana2  ", " ana2@test.com ", "1999-12-31");
+
+            var guardado = _db.NuevoContexto().Usuarios.Single(u => u.Id == ana.Id);
+            Assert.Equal("ana2", guardado.Usuario);
+            Assert.Equal("ana2@test.com", guardado.Correo);
+            Assert.Equal("1999-12-31", guardado.Fecha);
+            Assert.Equal("Estudiante", guardado.Rol);
+            Assert.Equal(hashOriginal, guardado.Contrasena);
+        }
+
+        [Fact]
+        public void ActualizarPerfil_ConElCorreoDeOtroUsuario_LanzaInvalidOperationException()
+        {
+            _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));
+            _servicio.AgregarUsuario(NuevoUsuario("beto", "beto@test.com"));
+            var beto = _db.Context.Usuarios.Single(u => u.Usuario == "beto");
+
+            Assert.Throws<InvalidOperationException>(() =>
+                _servicio.ActualizarPerfil(beto.Id, "beto", "ana@test.com", "2000-01-01"));
+        }
+
+        [Fact]
+        public void ActualizarPerfil_ConservandoSusPropiosDatos_NoLanzaError()
+        {
+            _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));
+            var ana = _db.Context.Usuarios.Single(u => u.Usuario == "ana");
+
+            _servicio.ActualizarPerfil(ana.Id, "ana", "ana@test.com", "2001-02-03");
+
+            Assert.Equal("2001-02-03", _db.NuevoContexto().Usuarios.Single(u => u.Id == ana.Id).Fecha);
+        }
+
+        [Fact]
+        public void CambiarContrasena_ConLaActualCorrecta_GuardaLaNueva()
+        {
+            _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));
+            var ana = _db.Context.Usuarios.Single(u => u.Usuario == "ana");
+
+            var cambiada = _servicio.CambiarContrasena(ana.Id, "Secreta123", "Nueva456");
+
+            Assert.True(cambiada);
+            Assert.Null(_servicio.Login("ana", "Secreta123"));
+            Assert.NotNull(_servicio.Login("ana", "Nueva456"));
+        }
+
+        [Fact]
+        public void CambiarContrasena_ConLaActualIncorrecta_NoCambiaNada()
+        {
+            _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));
+            var ana = _db.Context.Usuarios.Single(u => u.Usuario == "ana");
+
+            var cambiada = _servicio.CambiarContrasena(ana.Id, "incorrecta", "Nueva456");
+
+            Assert.False(cambiada);
+            Assert.NotNull(_servicio.Login("ana", "Secreta123"));
+        }
+
+        [Fact]
         public void Login_ConCredencialesCorrectas_DevuelveElUsuario()
         {
             _servicio.AgregarUsuario(NuevoUsuario("ana", "ana@test.com"));

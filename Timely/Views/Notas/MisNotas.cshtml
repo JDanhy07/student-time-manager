@@ -9,7 +9,7 @@
 
 <div class="container">
     <h1>Mis Notas</h1>
-    <p><a asp-action="Create" class="crear-nota">Crear nueva nota</a></p>
+    <p><a asp-action="Create" class="btn btn-primary">Crear nueva nota</a></p>
 
     @foreach (var grupo in Model.GroupBy(n => n.Carpeta))
     {
@@ -21,8 +21,8 @@
                     <div class="blockquote-footer">@Html.DisplayFor(modelItem => item.Titulo)</div>
                     <div class="note-content">@Html.DisplayFor(modelItem => item.Contenido)</div>
                     <div class="actions">
-                        @Html.ActionLink("Editar", "Edit", new { id = item.Id }, new { @class = "btn-edit" }) |
-                        @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }, new { @class = "btn-delete" })
+                        @Html.ActionLink("Editar", "Edit", new { id = item.Id }, new { @class = "btn btn-outline-primary btn-sm" })
+                        @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }, new { @class = "btn btn-outline-danger btn-sm" })
                     </div>
                 </div>
             }

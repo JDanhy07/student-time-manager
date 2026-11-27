@@ -1,0 +1,13 @@
+﻿@* Aplica el tema y el tamaño de texto guardados ANTES de pintar la página, para evitar el parpadeo de claro a oscuro.
+   Va dentro de <head>. La lógica completa (botones, cambios en vivo) está en wwwroot/js/site.js *@
+<script>
+    (function () {
+        try {
+            var raiz = document.documentElement;
+            var tema = localStorage.getItem('timely-tema') || 'auto';
+            var oscuro = tema === 'oscuro' || (tema === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+            raiz.setAttribute('data-tema', oscuro ? 'dark' : 'light');
+            if (localStorage.getItem('timely-texto') === 'grande') raiz.setAttribute('data-texto', 'grande');
+        } catch (e) { }
+    })();
+</script>

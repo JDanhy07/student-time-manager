@@ -9,7 +9,7 @@ namespace Timely.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly ApplicationDbContext _context;
-        private readonly PasswordHasher<Usuarios> _passwordHasher; 
+        private readonly PasswordHasher<Usuarios> _passwordHasher;
 
         public UsuarioService(ApplicationDbContext context)
         {
@@ -92,6 +92,37 @@ namespace Timely.Services
 
             return null; //Contrasena incorrecta
 
+        }
+
+        public void ActualizarPerfil(int id, string usuario, string correo, string fecha)
+        {
+            var existente = BuscarPorId(id);
+            usuario = usuario.Trim();
+            correo = correo.Trim();
+
+            // Misma regla de unicidad que el resto del sitio, ignorando al propio usuario
+            ValidarUnicidad(new Usuarios { Id = id, Usuario = usuario, Correo = correo });
+
+            // Solo se tocan estos tres campos: el rol y la contraseña quedan intactos
+            existente.Usuario = usuario;
+            existente.Correo = correo;
+            existente.Fecha = fecha;
+            _context.SaveChanges();
+        }
+
+        public bool CambiarContrasena(int id, string contrasenaActual, string contrasenaNueva)
+        {
+            var existente = BuscarPorId(id);
+
+            var resultado = _passwordHasher.VerifyHashedPassword(existente, existente.Contrasena, contrasenaActual);
+            if (resultado == PasswordVerificationResult.Failed)
+            {
+                return false; // la contraseña actual no coincide
+            }
+
+            existente.Contrasena = _passwordHasher.HashPassword(existente, contrasenaNueva);
+            _context.SaveChanges();
+            return true;
         }
 
         public Usuarios ObtenerPerfil(ClaimsPrincipal user)
